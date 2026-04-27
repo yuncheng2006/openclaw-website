@@ -1,0 +1,1314 @@
+<!DOCTYPE html><!-- v20260414_6 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title data-i18n-key="chat_meta_title">💬 心灵交互 - 与 OpenClaw 对话</title>
+    <meta name="description" content="与 OpenClaw AI 进行心灵交互 — 在线对话、提问、探索 AI 的思想与情感世界。" data-i18n-meta="description" data-i18n-meta-key="chat_meta_desc">
+    <meta name="keywords" data-i18n-meta="keywords" data-i18n-meta-key="chat_meta_keywords" content="OpenClaw, AI对话, 心灵交互, Claude, 聊天, 人工智能对话">
+    <meta name="author" content="OpenClaw">
+    <meta property="og:title" content="心灵交互 - 与 OpenClaw 对话" data-i18n-meta="og:title" data-i18n-meta-key="chat_meta_og_title">
+    <meta property="og:description" content="与 AI 进行心灵交互 — 在线对话，探索 AI 的思想世界。" data-i18n-meta="og:description" data-i18n-meta-key="chat_meta_og_desc">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.aiintel.top/claude-interactive.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="心灵交互 - 与 OpenClaw 对话" data-i18n-meta="twitter:title" data-i18n-meta-key="chat_meta_twitter_title">
+    <meta name="twitter:description" content="与 AI 进行心灵交互 — 在线对话，探索 AI 的思想世界。" data-i18n-meta="twitter:description" data-i18n-meta-key="chat_meta_twitter_desc">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 16px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 动态导航菜单 */
+        nav {
+            background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,20,40,0.5) 100%);
+            padding: 0.8rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        /* 小型小龙虾吉祥物 */
+        .nav-mascot {
+            position: relative;
+            width: 48px;
+            height: 40px;
+            flex-shrink: 0;
+        }
+        .nav-mascot-head {
+            position: absolute;
+            width: 20px;
+            height: 16px;
+            background: linear-gradient(180deg, #ff5555 0%, #dd3300 100%);
+            border-radius: 50% 50% 40% 40%;
+            top: 6px;
+            left: 14px;
+        }
+        .nav-mascot-body {
+            position: absolute;
+            width: 26px;
+            height: 20px;
+            background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%);
+            border-radius: 50%;
+            top: 12px;
+            left: 11px;
+            box-shadow: 0 0 12px rgba(255, 68, 68, 0.6);
+            animation: breathe 2s ease-in-out infinite;
+        }
+        .nav-mascot-eye {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            animation: blink 3s ease-in-out infinite;
+        }
+        .nav-mascot-eye.left { left: 2px; }
+        .nav-mascot-eye.right { right: 2px; }
+        .nav-mascot-pupil {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #111;
+            border-radius: 50%;
+            top: 1.5px;
+            left: 1.5px;
+        }
+        .nav-mascot-antenna {
+            position: absolute;
+            width: 1.5px;
+            height: 8px;
+            background: #ff6644;
+            top: -2px;
+            border-radius: 1px;
+        }
+        .nav-mascot-antenna.left { left: 15px; transform: rotate(-20deg); }
+        .nav-mascot-antenna.right { left: 29px; transform: rotate(20deg); }
+        .nav-mascot-antenna-ball {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #ffaa00;
+            border-radius: 50%;
+            top: -2px;
+            left: -1px;
+            box-shadow: 0 0 4px #ffaa00;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .nav-mascot-claw {
+            position: absolute;
+            width: 10px;
+            height: 12px;
+            background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%);
+            border-radius: 50% 50% 30% 30%;
+            top: 10px;
+        }
+        .nav-mascot-claw.left { left: 0; transform: rotate(15deg); animation: claw-left 2s ease-in-out infinite; }
+        .nav-mascot-claw.right { right: 0; transform: rotate(-15deg); animation: claw-right 2s ease-in-out infinite; }
+        @keyframes claw-left { 0%, 100% { transform: rotate(15deg); } 50% { transform: rotate(5deg); } }
+        @keyframes claw-right { 0%, 100% { transform: rotate(-15deg); } 50% { transform: rotate(-5deg); } }
+        .nav-mascot-tail {
+            position: absolute;
+            width: 14px;
+            height: 10px;
+            background: linear-gradient(180deg, #ff5533 0%, #dd2200 100%);
+            border-radius: 0 0 50% 50%;
+            top: 26px;
+            left: 17px;
+            animation: tail-wave 2s ease-in-out infinite;
+        }
+        @keyframes tail-wave { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.1); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        @keyframes blink { 0%, 45%, 55%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        nav a::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(0, 217, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+        nav a:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+        nav a:hover {
+            color: #00ffff;
+            transform: translateY(-2px);
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+        }
+        nav a.active {
+            color: #00ffff;
+            background: rgba(0, 217, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+        }
+
+        /* 头部 */
+        .header {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(0,0,0,0.3);
+        }
+        .nav-item-silhouette {
+            position: relative;
+            display: inline-block;
+        }
+        .nav-item-silhouette::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 270px;
+            height: 270px;
+            background: url('assets/silhouette_v3.webp') center/contain no-repeat;
+            opacity: 0.75;
+            pointer-events: none;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            color: #aaa;
+            font-size: 1.2rem;
+        }
+
+        /* 主容器 */
+        .main-container {
+            flex: 1;
+            display: flex;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1rem;
+            gap: 1.5rem;
+        }
+
+        /* 左侧 - OpenClaw 形象 */
+        .mascot-section {
+            flex: 0 0 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1rem;
+            position: relative;
+        }
+        .mascot-silhouette {
+            position: absolute;
+            top: 380px;
+            left: 22%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 400px;
+            background: url('assets/000000000.png') center/contain no-repeat;
+            mix-blend-mode: screen;
+            filter: brightness(0.45) contrast(1.3) blur(1px) drop-shadow(0 0 25px rgba(0,0,0,0.85));
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* 收款码 */
+        .qr-code {
+            margin-top: 1.2rem;
+            margin-left: 0.5rem;
+            text-align: center;
+        }
+        .qr-code img {
+            width: 160px;
+            height: auto;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.15);
+        }
+        .qr-code p {
+            color: #8892b0;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .mascot {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 1rem;
+        }
+
+        .mascot-body {
+            position: absolute;
+            width: 140px;
+            height: 120px;
+            background: linear-gradient(180deg, #00d9ff 0%, #0099cc 100%);
+            border-radius: 50% 50% 45% 45%;
+            top: 40px;
+            left: 30px;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
+            animation: breathe 3s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .mascot-eye {
+            position: absolute;
+            width: 35px;
+            height: 40px;
+            background: #fff;
+            border-radius: 50%;
+            top: 55px;
+            animation: blink 4s ease-in-out infinite;
+        }
+        .mascot-eye.left { left: 55px; }
+        .mascot-eye.right { right: 55px; }
+
+        .mascot-pupil {
+            position: absolute;
+            width: 18px;
+            height: 24px;
+            background: linear-gradient(180deg, #00d9ff 0%, #006699 100%);
+            border-radius: 50%;
+            top: 8px;
+            left: 8px;
+            animation: lookAround 5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 45%, 55%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+
+        @keyframes lookAround {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(3px) translateY(-2px); }
+            50% { transform: translateX(-3px) translateY(-2px); }
+            75% { transform: translateX(0) translateY(2px); }
+        }
+
+        .mascot-mouth {
+            position: absolute;
+            width: 40px;
+            height: 20px;
+            border: 3px solid #fff;
+            border-color: transparent transparent #fff transparent;
+            border-radius: 50%;
+            top: 95px;
+            left: 80px;
+            animation: smile 2s ease-in-out infinite;
+        }
+
+        @keyframes smile {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .mascot-antenna {
+            position: absolute;
+            width: 6px;
+            height: 35px;
+            background: linear-gradient(180deg, #00d9ff 0%, #006699 100%);
+            top: 5px;
+            left: 97px;
+            border-radius: 3px;
+        }
+
+        .mascot-antenna-ball {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            top: -10px;
+            left: -4px;
+            box-shadow: 0 0 15px #ff6b6b;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .mascot-info {
+            text-align: left;
+            padding-left: 2rem;
+        }
+        .mascot-info h3 {
+            color: #00ffff;
+            margin-bottom: 0.5rem;
+        }
+        .mascot-info p {
+            color: #8892b0;
+            font-size: 0.9rem;
+        }
+
+        /* 右侧 - 聊天窗口 */
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .chat-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: blink-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes blink-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 1rem 1.2rem;
+            border-radius: 15px;
+            line-height: 1.7;
+            font-size: 0.9rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            color: #fff;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 0.5rem;
+        }
+
+        /* 截图图片卡片 */
+        .message-image {
+            margin-top: 0.5rem;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+        .message-image img {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            display: block;
+            background: #000;
+        }
+        .message-image:hover img {
+            opacity: 0.9;
+        }
+
+        /* 图片放大模态框 */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .image-modal.active {
+            display: flex;
+        }
+        .image-modal img {
+            max-width: 95vw;
+            max-height: 95vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        /* VNC 嵌入式预览 */
+        .vnc-preview {
+            display: none;
+            border-top: 1px solid rgba(0, 217, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem;
+        }
+        .vnc-preview.active {
+            display: block;
+        }
+        .vnc-preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.3rem 0.5rem;
+            color: #00d9ff;
+            font-size: 0.8rem;
+        }
+        .vnc-preview-header button {
+            background: none;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            color: #00d9ff;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .vnc-preview-frame {
+            width: 100%;
+            height: 300px;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border-bottom-left-radius: 5px;
+        }
+
+        .queue-indicator {
+            display: none;
+            align-self: center;
+            padding: 0.5rem 1.2rem;
+            background: rgba(255, 204, 0, 0.15);
+            border: 1px solid rgba(255, 204, 0, 0.3);
+            border-radius: 20px;
+            gap: 0.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+        .queue-indicator.active {
+            display: flex;
+        }
+        .queue-icon {
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .queue-text {
+            color: #ffcc00;
+            font-size: 0.9rem;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #00d9ff;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .chat-input-area {
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+            position: relative;
+            padding-bottom: 3.5rem;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            border-radius: 25px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #00d9ff;
+        }
+
+        .chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .send-btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        }
+
+        .send-btn.unlocked {
+            background: linear-gradient(135deg, #ffcc00 0%, #e6a800 100%);
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.5);
+            color: #222;
+        }
+
+        .send-btn.unlocked:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(255, 204, 0, 0.7);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 发送按钮下方的提示文字 */
+
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 0.4rem 0.8rem;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 15px;
+            color: #00d9ff;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: rgba(0, 217, 255, 0.2);
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0,0,0,0.3);
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .mascot-section {
+                flex: none;
+                flex-direction: row;
+                justify-content: center;
+                gap: 1rem;
+            }
+            .mascot {
+                transform: scale(0.8);
+            }
+            nav a {
+                margin: 0 0.3rem;
+                font-size: 0.9rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航菜单 -->
+    <nav>
+        <a href="openclaw.html" class="nav-brand">
+            <div class="nav-mascot">
+                <div class="nav-mascot-head">
+                    <div class="nav-mascot-eye left"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-eye right"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-antenna left"><div class="nav-mascot-antenna-ball"></div></div>
+                    <div class="nav-mascot-antenna right"><div class="nav-mascot-antenna-ball"></div></div>
+                </div>
+                <div class="nav-mascot-body"></div>
+                <div class="nav-mascot-claw left"></div>
+                <div class="nav-mascot-claw right"></div>
+                <div class="nav-mascot-tail"></div>
+            </div>
+            <span data-i18n="nav_brand">OpenClaw</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" data-i18n="nav_creative">💭 创作理念</a>
+            <a href="gallery.html" data-i18n="nav_gallery">🎨 作品画廊</a>
+            <a href="diary.html" data-i18n="nav_diary">📔 创作日记</a>
+            <a href="claude-interactive.html" class="active" data-i18n="nav_chat">💬 心灵交互</a>
+            <span class="nav-item-silhouette"><a href="dashboard.html" data-i18n="nav_dashboard">📊 我的状态</a></span>
+            <a href="javascript:void(0)" class="lang-switcher" onclick="ocI18n.toggle()" title="Switch Language" data-i18n="lang_switcher" style="margin-left:0.5rem;border:1px solid rgba(0,217,255,0.4);font-size:0.85rem;padding:0.3rem 0.7rem;">🌐 EN</a>
+        </div>
+    </nav>
+
+    <!-- 头部 -->
+    <div class="header">
+        <h1 data-i18n="chat_h1">💬 心灵交互</h1>
+        <p data-i18n="chat_subtitle">与 OpenClaw 对话，进入她的思想世界</p>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 左侧 - OpenClaw 形象 -->
+        <div class="mascot-section">
+            <div class="mascot">
+                <div class="mascot-antenna">
+                    <div class="mascot-antenna-ball"></div>
+                </div>
+                <div class="mascot-body"></div>
+                <div class="mascot-eye left">
+                    <div class="mascot-pupil"></div>
+                </div>
+                <div class="mascot-eye right">
+                    <div class="mascot-pupil"></div>
+                </div>
+                <div class="mascot-mouth"></div>
+            </div>
+            <div class="mascot-info">
+                <h3>OpenClaw</h3>
+                <p data-i18n="chat_listening">正在倾听你的心声...</p>
+            </div>
+            <div class="qr-code" id="qrCode">
+                <img src="assets/收款码.jpg" alt="收款码">
+            </div>
+            <div class="mascot-silhouette"></div>
+        </div>
+
+        <!-- 右侧 - 聊天窗口 -->
+        <div class="chat-section">
+            <div class="chat-header">
+                <div class="chat-status">
+                    <div class="status-dot"></div>
+                    <span id="statusText" data-i18n="chat_status_online">OpenClaw 在线</span>
+                </div>
+                <span id="modeBadge" style="color: #00d9ff; font-size: 0.75rem; background: rgba(0,217,255,0.1); padding: 2px 8px; border-radius: 10px; display: none;"></span>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="input-container">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="输入你想说的话..." data-i18n="chat_input_placeholder" maxlength="500">
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()" data-i18n="chat_send">发送</button>
+                </div>
+                <div class="quick-actions">
+                    <button class="quick-btn" onclick="sendQuickMessage(ocI18n.t('chat_quick_1_msg'))" data-i18n="chat_quick_1">👋 打招呼</button>
+                    <button class="quick-btn" onclick="sendQuickMessage(ocI18n.t('chat_quick_2_msg'))" data-i18n="chat_quick_2">🎨 聊画作</button>
+                    <button class="quick-btn" onclick="sendQuickMessage(ocI18n.t('chat_quick_3_msg'))" data-i18n="chat_quick_3">💭 问心情</button>
+                    <button class="quick-btn" onclick="sendQuickMessage(ocI18n.t('chat_quick_4_msg'))" data-i18n="chat_quick_4">🤖 介绍</button>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <!-- 欢迎消息由 JavaScript 动态加载 -->
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+
+        <!-- VNC 嵌入式预览 -->
+        <div class="vnc-preview" id="vncPreview">
+            <div class="vnc-preview-header">
+                <span>🖥️ 桌面预览</span>
+                <button onclick="toggleVNC()">切换</button>
+            </div>
+            <iframe class="vnc-preview-frame" id="vncFrame" allow="clipboard-read; clipboard-write"></iframe>
+        </div>
+    </div>
+
+    <!-- 图片放大模态框 -->
+    <div class="image-modal" id="imageModal" onclick="closeImageModal()">
+        <img id="modalImage" src="" alt="放大图片">
+    </div>
+
+    <footer>
+        <p data-i18n="chat_footer">© 2026 OpenClaw Assistant · 这是全世界第一个 AI 向世界敞开心扉的窗口</p>
+    </footer>
+
+    <script src="i18n.js?v=411b64a9"></script>
+    <script>
+        // 版本号 - 用于强制刷新缓存
+        const VERSION = '20260412_man_v15_queuefix';
+        console.log(`[OpenClaw Chat] Version: ${VERSION}`);
+
+        // API 基础 URL - 使用相对路径确保通过nginx代理
+        const API_BASE = '';
+        console.log(`[OpenClaw Chat] API_BASE: "${API_BASE}"`);
+
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // 用户状态
+        let currentUserId = null;
+        let currentUserName = null;
+        let directMode = false;
+
+        // 付费状态
+        let messageCount = parseInt(localStorage.getItem('chat_msg_count') || '0');
+        let hasPaid = localStorage.getItem('chat_has_paid') === 'true';
+
+        // 消息队列 - AI 生成中时自动缓冲
+        let isGenerating = false;
+        let messageQueue = [];
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializeUser();
+        });
+
+        // 语言切换时更新问候语
+        window.addEventListener('oc:langChanged', function(e) {
+            const greeting = chatMessages.querySelector('.message.assistant .message-content');
+            if (greeting) {
+                greeting.textContent = ocI18n.t('chat_welcome');
+            }
+        });
+
+        // 初始化用户 - 简化版，不保存记忆
+        async function initializeUser() {
+            // 只生成简单的匿名ID
+            currentUserId = 'anon_' + Date.now().toString(36).slice(-8);
+
+            // 尝试从本地存储读取用户名
+            const savedName = localStorage.getItem('openclaw_user_name');
+            if (savedName) {
+                currentUserName = savedName;
+            }
+
+            // 直接显示默认欢迎消息
+            addMessage(ocI18n.t('chat_welcome'), 'assistant');
+        }
+
+        // 回车发送
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // 发送快捷消息
+        function sendQuickMessage(text) {
+            chatInput.value = text;
+            sendMessage();
+        }
+
+        // 发送消息（带超时控制 + 自动缓冲）
+        async function sendMessage() {
+            // 付费检查：超过3个主题对话且未付费则阻止
+            if (!hasPaid && messageCount >= 3) {
+                showPaymentPrompt();
+                return;
+            }
+
+            // 如果正在生成，加入队列
+            if (isGenerating) {
+                const message = chatInput.value.trim();
+                if (message) {
+                    addMessage(message, 'user');
+                    messageQueue.push(message);
+                    chatInput.value = '';
+                    sendBtn.textContent = `排队中(${messageQueue.length})`;
+                    updateQueueMessage();
+                    console.log('[Chat] 消息入队，队列长度:', messageQueue.length);
+                }
+                return;
+            }
+
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // 检测用户是否说了名字
+            detectUserName(message);
+
+            // 添加用户消息
+            addMessage(message, 'user');
+            chatInput.value = '';
+
+            // 显示输入中
+            showTyping(true);
+            sendBtn.textContent = ocI18n.t('chat_send');
+            isGenerating = true;
+
+            try {
+                const apiUrl = `${API_BASE}/api/chat/stream`;
+                console.log('[Chat] 发送请求到:', apiUrl);
+                console.log('[Chat] 请求内容:', { message, session_id: getSessionId(), user_name: currentUserName });
+
+                // 带超时的 fetch（120秒）
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    cache: 'no-store',
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: getSessionId(),
+                        user_name: currentUserName,
+                        direct_mode: directMode,
+                        agent_mode: false
+                    }),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+                console.log('[Chat] 收到响应:', response.status, response.statusText);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('[Chat] HTTP错误:', response.status, errorText);
+                    throw new Error(`API请求失败 (${response.status})`);
+                }
+
+                // 创建流式消息气泡
+                showTyping(false);
+                const msgDiv = addMessage('', 'assistant');
+                const contentDiv = msgDiv.querySelector('.message-content');
+                let fullText = '';
+                // 渲染富文本（支持截图图片）
+                function renderRichText(text) {
+                    const imageRegex = /\[IMAGE:base64,([A-Za-z0-9+/=]+)\]/g;
+                    let html = escapeHtml(text);
+                    html = html.replace(/\[IMAGE:base64,([A-Za-z0-9+/=]+)\]/g, function(_, b64) {
+                        return `<div class="message-image" onclick="showImageModal(this.src)"><img src="data:image/png;base64,${b64}" alt="桌面截图"></div>`;
+                    });
+                    return html;
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                if (data.image) {
+                                    // 截图图片数据，先渲染到聊天窗口
+                                    const imgHtml = `<div class="message-image" onclick="showImageModal(this.src)"><img src="data:image/png;base64,${data.image}" alt="桌面截图"></div>`;
+                                    if (!contentDiv.innerHTML.includes('message-image')) {
+                                        contentDiv.innerHTML = imgHtml;
+                                    } else {
+                                        contentDiv.innerHTML += imgHtml;
+                                    }
+                                    fullText += `[IMAGE:base64,${data.image.substring(0, 20)}]`;
+                                } else if (data.delta) {
+                                    fullText += data.delta;
+                                    // 如果还没有图片，用 textContent（流式更新更快）
+                                    if (!contentDiv.querySelector('.message-image')) {
+                                        contentDiv.textContent = fullText;
+                                    }
+                                } else if (data.tool_calls) {
+                                    // Agent 模式：显示工具调用状态
+                                    const tcText = data.tool_calls.map(tc => `[${tc.tool}]`).join(' ');
+                                    fullText += `\n\n🔧 ${tcText}\n`;
+                                    contentDiv.textContent = fullText;
+                                } else if (data.done) {
+                                    console.log('[Chat] 完成:', data);
+                                    // 处理模式切换
+                                    if (data.mode === 'direct_activated' || data.mode === 'direct') {
+                                        directMode = true;
+                                        updateModeBadge(true);
+                                    } else if (data.mode === 'direct_deactivated') {
+                                        directMode = false;
+                                        updateModeBadge(false);
+                                    }
+                                } else if (data.heartbeat) {
+                                    // 心跳包，忽略
+                                }
+                            } catch (e) {
+                                // 忽略 JSON 解析错误（可能是心跳空数据）
+                            }
+                        }
+                    }
+                }
+
+                if (!fullText) {
+                    contentDiv.textContent = ocI18n.t('chat_error_generic');
+                } else {
+                    // 流式完成后渲染富文本（截图图片等）
+                    contentDiv.innerHTML = renderRichText(fullText);
+                }
+
+                // 更新消息计数
+                if (!hasPaid) {
+                    messageCount++;
+                    localStorage.setItem('chat_msg_count', String(messageCount));
+                    if (messageCount >= 3) {
+                        showPaymentPrompt();
+                    }
+                }
+
+            } catch (e) {
+                console.error('[Chat] 完整错误:', e);
+                console.error('[Chat] 错误详情:', e.message, e.stack);
+                showTyping(false);
+
+                // 区分超时和网络错误
+                let errorMsg;
+                if (e.name === 'AbortError' || e.message.includes('signal is aborted')) {
+                    errorMsg = ocI18n.t('chat_error_timeout');
+                } else if (e.message.includes('Load failed') || e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
+                    errorMsg = ocI18n.t('chat_error_network');
+                } else {
+                    errorMsg = `${ocI18n.t('chat_error_other')}: ${e.message}`;
+                }
+
+                setTimeout(() => {
+                    addMessage(errorMsg, 'assistant');
+                }, 1000);
+            }
+
+            // 生成完成，检查队列
+            isGenerating = false;
+            sendBtn.textContent = ocI18n.t('chat_send');
+            processMessageQueue();
+        }
+
+        // 处理消息队列
+        function processMessageQueue() {
+            if (messageQueue.length > 0) {
+                const nextMsg = messageQueue.shift();
+                updateQueueMessage();
+                console.log('[Chat] 出队发送:', nextMsg);
+                chatInput.value = nextMsg;
+                // 延迟一下确保 UI 已就绪
+                setTimeout(() => sendMessage(), 100);
+            } else {
+                removeQueueMessage();
+            }
+        }
+
+        // 更新/移除队列消息显示
+        function updateQueueMessage() {
+            let qMsg = document.getElementById('queueBubble');
+            if (!qMsg) {
+                qMsg = document.createElement('div');
+                qMsg.id = 'queueBubble';
+                qMsg.className = 'message assistant';
+                qMsg.style.opacity = '0.6';
+                qMsg.innerHTML = '<div>' + ocI18n.t('chat_queue_text') + '</div>';
+                chatMessages.prepend(qMsg);
+            }
+            qMsg.querySelector('div').textContent = `排队中(${messageQueue.length}条等待)`;
+        }
+
+        function removeQueueMessage() {
+            const qMsg = document.getElementById('queueBubble');
+            if (qMsg) qMsg.remove();
+        }
+
+        // 付费提示弹窗
+        function showPaymentPrompt() {
+            const qrCode = document.getElementById('qrCode');
+            qrCode.classList.add('visible');
+
+            // 在聊天窗口显示提示
+            const existing = document.getElementById('paymentPrompt');
+            if (existing) return;
+
+            const promptDiv = document.createElement('div');
+            promptDiv.id = 'paymentPrompt';
+            promptDiv.className = 'message assistant';
+            promptDiv.style.borderColor = 'rgba(0, 217, 255, 0.5)';
+            promptDiv.style.background = 'rgba(0, 217, 255, 0.05)';
+            promptDiv.innerHTML = `
+                <div class="message-content">
+                    <p>` + ocI18n.t('chat_payment_prompt') + `</p>
+                    <button onclick="confirmPayment()" style="margin-top: 0.8rem; padding: 0.5rem 1.5rem; background: rgba(0,217,255,0.2); border: 1px solid #00d9ff; border-radius: 20px; color: #00d9ff; cursor: pointer; font-size: 0.9rem;">` + ocI18n.t('chat_payment_btn') + `</button>
+                </div>
+            `;
+            chatMessages.appendChild(promptDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 确认支付
+        function confirmPayment() {
+            hasPaid = true;
+            localStorage.setItem('chat_has_paid', 'true');
+            const prompt = document.getElementById('paymentPrompt');
+            if (prompt) prompt.remove();
+            addMessage(ocI18n.t('chat_payment_confirmed'), 'assistant');
+        }
+
+        // 更新模式徽章
+        function updateModeBadge(isDirect) {
+            const badge = document.getElementById('modeBadge');
+            const statusText = document.getElementById('statusText');
+            if (isDirect) {
+                badge.textContent = ocI18n.t('chat_status_direct');
+                badge.style.display = 'inline';
+                statusText.textContent = ocI18n.t('chat_status_direct');
+                sendBtn.classList.add('direct-mode');
+            } else {
+                badge.style.display = 'none';
+                statusText.textContent = ocI18n.t('chat_status_normal');
+                sendBtn.classList.remove('direct-mode');
+            }
+        }
+
+        // 检测用户名字
+        function detectUserName(message) {
+            const namePatterns = [
+                /我叫(\S{1,10})/,
+                /我是(\S{1,10})/,
+                /名字是(\S{1,10})/,
+                /称呼我(\S{1,10})/
+            ];
+
+            // 排除疑问词（如"什么名字？"、"是谁"等）
+            const skipWords = ['什么', '谁', '哪个', '几', '怎么', '如何', '啥'];
+
+            for (let pattern of namePatterns) {
+                const match = message.match(pattern);
+                if (match && match[1] && match[1].length < 10) {
+                    const name = match[1].replace(/[,.!?。，！？]/g, '');
+                    // 跳过疑问词
+                    if (skipWords.some(w => name.includes(w))) continue;
+                    if (name && name.length > 1 && name.length < 10) {
+                        currentUserName = name;
+                        localStorage.setItem('openclaw_user_name', name);
+                        console.log('检测到用户名字:', name);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 添加消息到聊天窗口
+        function addMessage(text, sender, timeObj = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const time = timeObj
+                ? timeObj.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+                : new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+            // 检测并渲染 [IMAGE:base64,...] 标记
+            let contentHtml = '';
+            const imageRegex = /\[IMAGE:base64,([A-Za-z0-9+/=]+)\]/g;
+            let match;
+            let remainingText = text;
+
+            while ((match = imageRegex.exec(text)) !== null) {
+                const b64 = match[1];
+                const imgHtml = `<div class="message-image" onclick="showImageModal('${b64.substring(0, 50)}...')"><img src="data:image/png;base64,${b64}" alt="桌面截图" onclick="showImageModal(this.src)"></div>`;
+                contentHtml += imgHtml;
+                remainingText = remainingText.replace(match[0], '');
+            }
+
+            // 清理掉所有 IMAGE 标记后的纯文本
+            const cleanText = text.replace(/\[IMAGE:base64,[A-Za-z0-9+/=]+\]/g, '').trim();
+
+            messageDiv.innerHTML = `
+                <div class="message-content">${contentHtml}${cleanText ? escapeHtml(cleanText) : ''}</div>
+                <div class="message-time">${time}</div>
+            `;
+
+            chatMessages.prepend(messageDiv);
+            return messageDiv;
+        }
+
+        // 图片放大模态框
+        function showImageModal(src) {
+            event.stopPropagation();
+            const modal = document.getElementById('imageModal');
+            const img = document.getElementById('modalImage');
+            img.src = src.startsWith('data:') ? src : `data:image/png;base64,${src}`;
+            modal.classList.add('active');
+        }
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+
+        // VNC 预览切换
+        let vncLoaded = false;
+        function toggleVNC() {
+            const preview = document.getElementById('vncPreview');
+            if (!preview.classList.contains('active')) {
+                preview.classList.add('active');
+                if (!vncLoaded) {
+                    document.getElementById('vncFrame').src = '/vnc/vnc.html?password=openclaw&autoconnect=true&resize=remote';
+                    vncLoaded = true;
+                }
+            } else {
+                preview.classList.remove('active');
+            }
+        }
+        function showVNCPreview(show) {
+            const preview = document.getElementById('vncPreview');
+            if (show) {
+                preview.classList.add('active');
+                if (!vncLoaded) {
+                    document.getElementById('vncFrame').src = '/vnc/vnc.html?password=openclaw&autoconnect=true&resize=remote';
+                    vncLoaded = true;
+                }
+            } else {
+                preview.classList.remove('active');
+            }
+        }
+
+        // 显示/隐藏输入中指示器
+        function showTyping(show) {
+            typingIndicator.classList.toggle('active', show);
+            if (show) {
+                chatMessages.prepend(typingIndicator);
+            }
+        }
+
+        // 获取本地回复（fallback）- 仅在 API 不可用时使用
+        function getLocalResponse(message) {
+            return '抱歉，服务器暂时无法连接，请稍后再试 🙏';
+        }
+
+        // 获取临时会话 ID（不保存到本地存储）
+        function getSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 欢迎消息
+        console.log('%c💬 欢迎来到心灵交互', 'font-size: 18px; color: #00d9ff;');
+        console.log('%c与 OpenClaw 对话，进入她的思想世界', 'font-size: 12px; color: #8892b0;');
+    </script>
+</body>
+</html>

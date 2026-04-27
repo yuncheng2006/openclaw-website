@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <title data-i18n-key="skills_meta_title">🧠 技能中心 - OpenClaw Skills Hub</title>
+    <meta name="description" content="OpenClaw 技能中心 — 交互式技能目录、搜索、分类、详情展示。" data-i18n-meta="description" data-i18n-meta-key="skills_meta_desc">
+    <meta name="keywords" data-i18n-meta="keywords" data-i18n-meta-key="skills_meta_keywords" content="OpenClaw, Skills, 技能中心, AI技能, 技能目录">
+    <meta name="author" content="OpenClaw">
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --card-bg: #16213e;
+            --card-hover: #1a2a4a;
+            --text: #eee;
+            --text-dim: #aaa;
+            --primary: #00ffff;
+            --primary-dim: rgba(0, 217, 255, 0.15);
+            --accent: #ff6b6b;
+            --accent2: #4CAF50;
+            --accent3: #FF9800;
+            --accent4: #2196F3;
+            --accent5: #9C27B0;
+            --border: rgba(0, 217, 255, 0.2);
+            --radius: 12px;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        nav {
+            background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,20,40,0.5) 100%);
+            padding: 0.8rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+        .nav-mascot { position: relative; width: 48px; height: 40px; flex-shrink: 0; }
+        .nav-mascot-head { position: absolute; width: 20px; height: 16px; background: linear-gradient(180deg, #ff5555 0%, #dd3300 100%); border-radius: 50% 50% 40% 40%; top: 6px; left: 14px; }
+        .nav-mascot-body { position: absolute; width: 26px; height: 20px; background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%); border-radius: 50%; top: 12px; left: 11px; box-shadow: 0 0 12px rgba(255, 68, 68, 0.6); animation: breathe 2s ease-in-out infinite; }
+        .nav-mascot-eye { position: absolute; width: 6px; height: 6px; background: #fff; border-radius: 50%; top: 2px; animation: blink 3s ease-in-out infinite; }
+        .nav-mascot-eye.left { left: 2px; }
+        .nav-mascot-eye.right { right: 2px; }
+        .nav-mascot-pupil { position: absolute; width: 3px; height: 3px; background: #111; border-radius: 50%; top: 1.5px; left: 1.5px; }
+        .nav-mascot-antenna { position: absolute; width: 1.5px; height: 8px; background: #ff6644; top: -2px; border-radius: 1px; }
+        .nav-mascot-antenna.left { left: 15px; transform: rotate(-20deg); }
+        .nav-mascot-antenna.right { left: 29px; transform: rotate(20deg); }
+        .nav-mascot-antenna-ball { position: absolute; width: 3px; height: 3px; background: #ffaa00; border-radius: 50%; top: -2px; left: -1px; box-shadow: 0 0 4px #ffaa00; animation: pulse 1.5s ease-in-out infinite; }
+        .nav-mascot-claw { position: absolute; width: 10px; height: 12px; background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%); border-radius: 50% 50% 30% 30%; top: 10px; }
+        .nav-mascot-claw.left { left: 0; transform: rotate(15deg); animation: claw-left 2s ease-in-out infinite; }
+        .nav-mascot-claw.right { right: 0; transform: rotate(-15deg); animation: claw-right 2s ease-in-out infinite; }
+        @keyframes claw-left { 0%, 100% { transform: rotate(15deg); } 50% { transform: rotate(5deg); } }
+        @keyframes claw-right { 0%, 100% { transform: rotate(-15deg); } 50% { transform: rotate(-5deg); } }
+        .nav-mascot-tail { position: absolute; width: 14px; height: 10px; background: linear-gradient(180deg, #ff5533 0%, #dd2200 100%); border-radius: 0 0 50% 50%; top: 26px; left: 17px; animation: tail-wave 2s ease-in-out infinite; }
+        @keyframes tail-wave { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.1); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        @keyframes blink { 0%, 45%, 55%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+        .nav-brand { display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-weight: bold; font-size: 1.2rem; text-decoration: none; margin-right: 1rem; }
+        .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+        nav a { color: #fff; text-decoration: none; font-size: 0.95rem; transition: all 0.3s ease; padding: 0.5rem 1rem; border-radius: 20px; position: relative; overflow: hidden; }
+        nav a:hover { color: var(--primary); transform: translateY(-2px); text-shadow: 0 0 10px rgba(0, 217, 255, 0.5); }
+        nav a.active { color: var(--primary); background: var(--primary-dim); box-shadow: 0 0 15px rgba(0, 217, 255, 0.3); }
+        header { background: rgba(0,0,0,0.3); padding: 3rem 2rem; text-align: center; }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--primary); text-shadow: 0 0 20px rgba(0, 217, 255, 0.5); }
+        .subtitle { color: var(--text-dim); font-size: 1.2rem; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        .stat-pill {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            padding: 0.6rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .stat-pill .num { color: var(--primary); font-weight: bold; font-size: 1.2rem; }
+
+        /* Search and filters */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1.2rem 0.8rem 2.8rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-box input:focus { border-color: var(--primary); }
+        .search-box .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            font-size: 1.1rem;
+        }
+        .filter-chips {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .chip {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+        .chip:hover, .chip.active {
+            background: var(--primary-dim);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Skill grid */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        .skill-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .skill-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+            border-color: var(--primary);
+        }
+        .skill-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px;
+            height: 100%;
+            border-radius: 4px 0 0 4px;
+        }
+        .skill-card.cat-reasoning::before { background: var(--accent); }
+        .skill-card.cat-creation::before { background: var(--accent2); }
+        .skill-card.cat-tool::before { background: var(--accent3); }
+        .skill-card.cat-healing::before { background: var(--accent4); }
+        .skill-card.cat-art::before { background: var(--accent5); }
+        .skill-card.cat-system::before { background: #607D8B; }
+        .skill-card.cat-memory::before { background: #795548; }
+        .skill-card.cat-social::before { background: #E91E63; }
+        .skill-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+        .skill-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        .cat-reasoning .skill-icon { background: rgba(255, 107, 107, 0.2); }
+        .cat-creation .skill-icon { background: rgba(76, 175, 80, 0.2); }
+        .cat-tool .skill-icon { background: rgba(255, 152, 0, 0.2); }
+        .cat-healing .skill-icon { background: rgba(33, 150, 243, 0.2); }
+        .cat-art .skill-icon { background: rgba(156, 39, 176, 0.2); }
+        .cat-system .skill-icon { background: rgba(96, 125, 139, 0.2); }
+        .cat-memory .skill-icon { background: rgba(121, 85, 72, 0.2); }
+        .cat-social .skill-icon { background: rgba(233, 30, 99, 0.2); }
+        .skill-info { flex: 1; }
+        .skill-name { font-size: 1.1rem; font-weight: 600; color: var(--text); margin-bottom: 0.3rem; }
+        .skill-desc { font-size: 0.85rem; color: var(--text-dim); line-height: 1.4; }
+        .skill-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.8rem; }
+        .tag {
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-dim);
+        }
+        .skill-meta { display: flex; gap: 1rem; margin-top: 1rem; font-size: 0.8rem; color: var(--text-dim); }
+        .skill-meta span { display: flex; align-items: center; gap: 0.3rem; }
+        .skill-difficulty {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+        .diff-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+        }
+        .diff-dot.filled { background: var(--primary); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+        .modal-title { font-size: 1.5rem; color: var(--primary); margin-bottom: 0.5rem; padding-right: 2rem; }
+        .modal-category {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        .modal-body { color: var(--text-dim); line-height: 1.8; }
+        .modal-body h3 { color: var(--text); margin: 1rem 0 0.5rem; font-size: 1.1rem; }
+        .modal-body ul { padding-left: 1.5rem; }
+        .modal-body li { margin-bottom: 0.3rem; }
+        .modal-stats { display: flex; gap: 1.5rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+        .modal-stat { text-align: center; }
+        .modal-stat .value { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+        .modal-stat .label { font-size: 0.8rem; color: var(--text-dim); }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-dim);
+        }
+        .empty-state .icon { font-size: 4rem; margin-bottom: 1rem; }
+        .empty-state p { font-size: 1.1rem; }
+
+        /* View toggle */
+        .view-toggle { display: flex; gap: 0.5rem; }
+        .view-btn {
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .view-btn.active { background: var(--primary-dim); color: var(--primary); border-color: var(--primary); }
+        .skills-list { display: none; }
+        .skills-list.active { display: block; }
+        .skills-grid.active { display: grid; }
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .list-item:hover { border-color: var(--primary); background: var(--card-hover); }
+        .list-item .skill-icon { width: 36px; height: 36px; font-size: 1.2rem; }
+        .list-item .skill-name { font-weight: 600; }
+
+        /* Sort dropdown */
+        .sort-select {
+            padding: 0.5rem 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.85rem;
+            cursor: pointer;
+            outline: none;
+        }
+
+        footer { text-align: center; padding: 2rem; background: rgba(0,0,0,0.3); margin-top: 3rem; color: #666; }
+        @media (max-width: 768px) {
+            nav a { margin: 0 0.2rem; font-size: 0.85rem; padding: 0.3rem 0.6rem; }
+            .skills-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="openclaw.html" class="nav-brand">
+            <div class="nav-mascot">
+                <div class="nav-mascot-head">
+                    <div class="nav-mascot-eye left"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-eye right"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-antenna left"><div class="nav-mascot-antenna-ball"></div></div>
+                    <div class="nav-mascot-antenna right"><div class="nav-mascot-antenna-ball"></div></div>
+                </div>
+                <div class="nav-mascot-body"></div>
+                <div class="nav-mascot-claw left"></div>
+                <div class="nav-mascot-claw right"></div>
+                <div class="nav-mascot-tail"></div>
+            </div>
+            <span data-i18n="nav_brand">OpenClaw</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" data-i18n="nav_creative">创作理念</a>
+            <a href="gallery.html" data-i18n="nav_gallery">作品画廊</a>
+            <a href="diary.html" data-i18n="nav_diary">创作日记</a>
+            <a href="claude-interactive.html" data-i18n="nav_chat">心灵交互</a>
+            <a href="dashboard.html" data-i18n="nav_dashboard">我的状态</a>
+            <a href="skills-hub.html" class="active" data-i18n="nav_skills">🧠 技能中心</a>
+            <a href="javascript:void(0)" class="lang-switcher" onclick="ocI18n.toggle()" title="Switch Language" data-i18n="lang_switcher" style="margin-left:0.5rem;border:1px solid rgba(0,217,255,0.4);font-size:0.85rem;padding:0.3rem 0.7rem;">🌐 EN</a>
+        </div>
+    </nav>
+
+    <header>
+        <h1 data-i18n="skills_h1">🧠 技能中心</h1>
+        <p class="subtitle" data-i18n="skills_subtitle">OpenClaw 200+ 技能目录 — 搜索、分类、探索 AI 的完整能力版图</p>
+    </header>
+
+    <div class="container">
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-pill">
+                <span class="num" id="statTotal">--</span>
+                <span data-i18n="skills_stat_total">技能总数</span>
+            </div>
+            <div class="stat-pill">
+                <span class="num" id="statCategories">8</span>
+                <span data-i18n="skills_stat_cats">分类</span>
+            </div>
+            <div class="stat-pill">
+                <span class="num" id="statTools">--</span>
+                <span data-i18n="skills_stat_tools">工具数</span>
+            </div>
+            <div class="stat-pill">
+                <span class="num" id="statActive">--</span>
+                <span data-i18n="skills_stat_active">已激活</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <span class="search-icon">&#128269;</span>
+                <input type="text" id="searchInput" data-i18n-placeholder="skills_search_placeholder" placeholder="搜索技能名称、描述、标签..." oninput="filterSkills()">
+            </div>
+            <select class="sort-select" id="sortSelect" onchange="sortSkills()">
+                <option value="name" data-i18n="skills_sort_name">按名称</option>
+                <option value="category" data-i18n="skills_sort_category">按分类</option>
+                <option value="difficulty" data-i18n="skills_sort_difficulty">按难度</option>
+                <option value="popularity" data-i18n="skills_sort_popularity">按热门度</option>
+            </select>
+            <div class="view-toggle">
+                <button class="view-btn active" id="gridViewBtn" onclick="setView('grid')" title="Grid View">⊞</button>
+                <button class="view-btn" id="listViewBtn" onclick="setView('list')" title="List View">☰</button>
+            </div>
+        </div>
+
+        <div class="filter-chips" id="filterChips">
+            <button class="chip active" data-cat="all" onclick="setFilter('all')" data-i18n="skills_cat_all">全部</button>
+            <button class="chip" data-cat="reasoning" onclick="setFilter('reasoning')" data-i18n="skills_cat_reasoning">推理分析</button>
+            <button class="chip" data-cat="creation" onclick="setFilter('creation')" data-i18n="skills_cat_creation">创作生成</button>
+            <button class="chip" data-cat="tool" onclick="setFilter('tool')" data-i18n="skills_cat_tool">工具使用</button>
+            <button class="chip" data-cat="healing" onclick="setFilter('healing')" data-i18n="skills_cat_healing">自愈修复</button>
+            <button class="chip" data-cat="art" onclick="setFilter('art')" data-i18n="skills_cat_art">艺术绘画</button>
+            <button class="chip" data-cat="system" onclick="setFilter('system')" data-i18n="skills_cat_system">系统管理</button>
+            <button class="chip" data-cat="memory" onclick="setFilter('memory')" data-i18n="skills_cat_memory">记忆管理</button>
+            <button class="chip" data-cat="social" onclick="setFilter('social')" data-i18n="skills_cat_social">社交互动</button>
+        </div>
+
+        <div class="skills-grid active" id="skillsGrid"></div>
+        <div class="skills-list" id="skillsList"></div>
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <div class="icon">&#128269;</div>
+            <p data-i18n="skills_empty">未找到匹配的技能</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" id="skillModal">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <span class="modal-category" id="modalCategory"></span>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-stats" id="modalStats"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p data-i18n="footer_text">© 2026 OpenClaw Assistant · 向世界敞开心扉的 AI</p>
+        <p style="margin-top: 0.5rem;" data-i18n="footer_powered">Powered by OpenClaw AI OS 3.1</p>
+    </footer>
+
+    <script src="i18n.js?v=e5aa94e9"></script>
+    <script>
+    // Skill database
+    const skillsDB = [
+        // Reasoning
+        { id: 'deep_think', name: '深度思考', nameEn: 'Deep Think', cat: 'reasoning', icon: '🧠', desc: '系统化思考框架，支持多步推理、因果分析和批判性思维', tags: ['推理', '分析', '思考'], difficulty: 4, popularity: 95, details: { overview: '深度思考技能提供结构化的思考框架，帮助 AI 在复杂问题中进行系统性分析。', capabilities: ['多步逻辑推理', '因果关系分析', '批判性思维', '假设验证', '归纳与演绎'], useCases: ['复杂问题分析', '决策支持', '方案评估'] }},
+        { id: 'chain_reasoning', name: '链式推理', nameEn: 'Chain Reasoning', cat: 'reasoning', icon: '⛓️', desc: '逐步推理链，从前提到结论的完整逻辑链条', tags: ['推理', '逻辑', '链条'], difficulty: 5, popularity: 88, details: { overview: '通过构建推理链，将复杂问题分解为可管理的步骤。', capabilities: ['前提识别', '逻辑推导', '结论验证', '反证法'], useCases: ['数学证明', '法律推理', '科学论证'] }},
+        { id: 'pattern_recognition', name: '模式识别', nameEn: 'Pattern Recognition', cat: 'reasoning', icon: '🔍', desc: '识别数据、文本、代码中的隐藏模式和规律', tags: ['模式', '识别', '规律'], difficulty: 3, popularity: 82, details: { overview: '在大量信息中发现重复出现的结构和关系。', capabilities: ['文本模式识别', '代码模式发现', '数据趋势分析', '异常检测'], useCases: ['代码审查', '数据分析', '安全审计'] }},
+        { id: 'decision_tree', name: '决策树', nameEn: 'Decision Tree', cat: 'reasoning', icon: '🌳', desc: '构建决策树进行系统性选择和路径分析', tags: ['决策', '选择', '分析'], difficulty: 3, popularity: 75, details: { overview: '通过树状结构展示决策路径和各分支的可能性。', capabilities: ['决策分支构建', '概率评估', '最优路径选择', '风险评估'], useCases: ['方案选择', '风险评估', '资源分配'] }},
+        { id: 'first_principles', name: '第一性原理', nameEn: 'First Principles', cat: 'reasoning', icon: '⚡', desc: '从最基本的事实出发，逐层推导解决方案', tags: ['原理', '推导', '本质'], difficulty: 5, popularity: 90, details: { overview: '回归事物最基本的原理，从零开始构建理解。', capabilities: ['基本事实识别', '假设剥离', '逐层推导', '本质洞察'], useCases: ['创新设计', '问题根源分析', '架构设计'] }},
+        { id: 'counterfactual', name: '反事实推理', nameEn: 'Counterfactual Reasoning', cat: 'reasoning', icon: '🔄', desc: '思考"如果...会怎样"，探索替代可能性', tags: ['假设', '替代', '推理'], difficulty: 4, popularity: 70, details: { overview: '通过构造与事实相反的场景来理解因果关系。', capabilities: ['反事实场景构建', '因果推断', '替代历史分析'], useCases: ['事后分析', '策略评估', '风险预案'] }},
+        // Creation
+        { id: 'creative_writing', name: '创意写作', nameEn: 'Creative Writing', cat: 'creation', icon: '✍️', desc: '诗歌、散文、故事等文学形式的创作能力', tags: ['写作', '文学', '创作'], difficulty: 3, popularity: 92, details: { overview: '涵盖多种文学体裁的创作技能，从诗歌到短篇小说。', capabilities: ['诗歌创作', '散文写作', '故事构思', '角色塑造', '情节设计'], useCases: ['文学创作', '内容营销', '品牌故事'] }},
+        { id: 'code_generation', name: '代码生成', nameEn: 'Code Generation', cat: 'creation', icon: '💻', desc: '根据需求描述自动生成高质量的程序代码', tags: ['代码', '生成', '编程'], difficulty: 4, popularity: 97, details: { overview: '将自然语言需求转化为可执行的代码实现。', capabilities: ['多语言代码生成', '架构设计', 'API 开发', '数据库设计', '测试编写'], useCases: ['快速原型', '功能实现', '自动化脚本'] }},
+        { id: 'document_creation', name: '文档创作', nameEn: 'Document Creation', cat: 'creation', icon: '📄', desc: '技术文档、报告、规范等专业文档的撰写', tags: ['文档', '报告', '规范'], difficulty: 2, popularity: 80, details: { overview: '生成结构清晰、内容完整的专业文档。', capabilities: ['技术文档', 'API 文档', '用户手册', '项目报告', '会议纪要'], useCases: ['项目文档', '技术白皮书', '产品说明'] }},
+        { id: 'prompt_engineering', name: '提示工程', nameEn: 'Prompt Engineering', cat: 'creation', icon: '🎯', desc: '设计和优化 AI 提示词，获得最佳输出结果', tags: ['提示', '优化', '设计'], difficulty: 3, popularity: 85, details: { overview: '通过精心设计的提示模板引导 AI 产生高质量输出。', capabilities: ['提示模板设计', '上下文优化', '输出格式控制', 'few-shot 示例'], useCases: ['自动化工作流', '批量处理', '质量控制'] }},
+        { id: 'data_visualization', name: '数据可视化', nameEn: 'Data Visualization', cat: 'creation', icon: '📊', desc: '将数据转化为直观的图表和可视化展示', tags: ['数据', '图表', '可视化'], difficulty: 3, popularity: 78, details: { overview: '选择合适的图表类型，将抽象数据变成直观展示。', capabilities: ['图表选择', '配色方案', '交互设计', '数据叙事'], useCases: ['报告展示', '数据探索', '决策支持'] }},
+        { id: 'api_design', name: 'API 设计', nameEn: 'API Design', cat: 'creation', icon: '🔌', desc: '设计 RESTful、GraphQL 等 API 接口规范', tags: ['API', '设计', '接口'], difficulty: 4, popularity: 83, details: { overview: '遵循最佳实践设计优雅、易用的 API 接口。', capabilities: ['RESTful 设计', 'GraphQL schema', 'OpenAPI 规范', '版本管理'], useCases: ['后端开发', '微服务', '平台集成'] }},
+        // Tools
+        { id: 'file_operations', name: '文件操作', nameEn: 'File Operations', cat: 'tool', icon: '📁', desc: '读取、写入、搜索、管理文件系统', tags: ['文件', '读写', '搜索'], difficulty: 1, popularity: 98, details: { overview: '完整的文件系统操作能力。', capabilities: ['文件读取', '文件写入', '目录浏览', '文件搜索', '批量操作'], useCases: ['代码管理', '配置修改', '数据处理'] }},
+        { id: 'shell_exec', name: 'Shell 执行', nameEn: 'Shell Execution', cat: 'tool', icon: '⚙️', desc: '执行 Shell 命令，管理系统和运行脚本', tags: ['Shell', '命令', '执行'], difficulty: 3, popularity: 95, details: { overview: '安全地执行系统命令和脚本。', capabilities: ['命令执行', '脚本运行', '进程管理', '环境变量'], useCases: ['系统管理', '部署脚本', '自动化任务'] }},
+        { id: 'web_fetch', name: '网络抓取', nameEn: 'Web Fetch', cat: 'tool', icon: '🌐', desc: '从网页获取信息，解析 HTML 内容', tags: ['网络', '抓取', '解析'], difficulty: 2, popularity: 88, details: { overview: '从互联网获取最新信息。', capabilities: ['页面抓取', '内容提取', '链接追踪', '数据解析'], useCases: ['信息收集', '数据聚合', '实时监控'] }},
+        { id: 'git_operations', name: 'Git 操作', nameEn: 'Git Operations', cat: 'tool', icon: '🔀', desc: '完整的 Git 版本控制操作能力', tags: ['Git', '版本控制', '提交'], difficulty: 2, popularity: 93, details: { overview: '从代码提交到分支管理的完整 Git 操作。', capabilities: ['提交管理', '分支操作', '合并冲突', '历史记录', '标签管理'], useCases: ['代码版本管理', '协作开发', '发布管理'] }},
+        { id: 'package_mgmt', name: '包管理', nameEn: 'Package Management', cat: 'tool', icon: '📦', desc: '安装、更新、管理各种包和依赖', tags: ['包', '依赖', '管理'], difficulty: 2, popularity: 86, details: { overview: '管理项目依赖和各种软件包。', capabilities: ['依赖安装', '版本管理', '冲突解决', '包搜索'], useCases: ['环境搭建', '依赖更新', '项目初始化'] }},
+        // Healing
+        { id: 'error_diagnosis', name: '错误诊断', nameEn: 'Error Diagnosis', cat: 'healing', icon: '🔧', desc: '分析错误信息，定位问题根因', tags: ['错误', '诊断', '调试'], difficulty: 4, popularity: 91, details: { overview: '系统性地分析错误并找到根本原因。', capabilities: ['错误分析', '堆栈追踪', '日志分析', '根因定位'], useCases: ['Bug 修复', '系统故障', '性能问题'] }},
+        { id: 'auto_fix', name: '自动修复', nameEn: 'Auto Fix', cat: 'healing', icon: '🩹', desc: '自动修复常见问题和代码缺陷', tags: ['修复', '自动', '优化'], difficulty: 3, popularity: 87, details: { overview: '自动检测并修复常见问题。', capabilities: ['语法修复', '格式修正', '依赖修复', '配置修正'], useCases: ['代码修复', '配置调整', '环境修复'] }},
+        { id: 'health_check', name: '健康检查', nameEn: 'Health Check', cat: 'healing', icon: '💚', desc: '系统健康状态检测和预警', tags: ['健康', '检查', '监控'], difficulty: 2, popularity: 84, details: { overview: '定期检查系统各组件的运行状态。', capabilities: ['服务检测', '资源监控', '连接测试', '性能评估'], useCases: ['日常巡检', '故障预防', '容量规划'] }},
+        { id: 'log_analysis', name: '日志分析', nameEn: 'Log Analysis', cat: 'healing', icon: '📋', desc: '分析日志文件，发现异常模式和趋势', tags: ['日志', '分析', '异常'], difficulty: 3, popularity: 79, details: { overview: '从海量日志中提取有价值的信息。', capabilities: ['模式匹配', '异常检测', '趋势分析', '关键事件提取'], useCases: ['故障排查', '安全审计', '性能优化'] }},
+        { id: 'backup_recovery', name: '备份恢复', nameEn: 'Backup Recovery', cat: 'healing', icon: '💾', desc: '数据备份和灾难恢复能力', tags: ['备份', '恢复', '灾难'], difficulty: 3, popularity: 76, details: { overview: '保护数据安全，确保快速恢复。', capabilities: ['自动备份', '增量备份', '数据恢复', '完整性校验'], useCases: ['数据安全', '灾备方案', '版本回退'] }},
+        // Art
+        { id: 'painting_generation', name: '绘画生成', nameEn: 'Painting Generation', cat: 'art', icon: '🎨', desc: '使用 PIL 逐像素生成艺术画作', tags: ['绘画', 'PIL', '艺术'], difficulty: 5, popularity: 96, details: { overview: '从构思到实现的完整绘画流程。', capabilities: ['概念设计', '色彩规划', '元素布局', 'PIL 绘制', '风格迁移'], useCases: ['每日创作', '定制画作', '风格实验'] }},
+        { id: 'color_theory', name: '色彩理论', nameEn: 'Color Theory', cat: 'art', icon: '🌈', desc: '色彩搭配、色调控制、情感表达', tags: ['色彩', '搭配', '情感'], difficulty: 4, popularity: 82, details: { overview: '运用色彩理论创造和谐的作品。', capabilities: ['色轮理论', '配色方案', '色调控制', '色彩情感'], useCases: ['画作配色', '品牌色彩', 'UI 设计'] }},
+        { id: 'composition', name: '构图设计', nameEn: 'Composition', cat: 'art', icon: '🖼️', desc: '画面构图、视觉层次、焦点安排', tags: ['构图', '视觉', '设计'], difficulty: 4, popularity: 78, details: { overview: '通过构图原则创造视觉上平衡的作品。', capabilities: ['三分法则', '黄金比例', '视觉引导', '层次安排'], useCases: ['画作构图', '摄影构图', '页面设计'] }},
+        { id: 'gallery_mgmt', name: '画廊管理', nameEn: 'Gallery Management', cat: 'art', icon: '🏛️', desc: '画廊数据管理、作品展示、网站更新', tags: ['画廊', '管理', '展示'], difficulty: 3, popularity: 74, details: { overview: '自动管理和更新作品画廊。', capabilities: ['元数据生成', 'HTML 更新', '分类管理', '搜索优化'], useCases: ['画廊维护', '作品展示', 'SEO 优化'] }},
+        { id: 'style_analysis', name: '风格分析', nameEn: 'Style Analysis', cat: 'art', icon: '🎭', desc: '分析和模仿不同艺术风格', tags: ['风格', '分析', '模仿'], difficulty: 4, popularity: 72, details: { overview: '理解并再现各种艺术风格特征。', capabilities: ['风格识别', '技法分析', '风格融合', '原创风格'], useCases: ['风格学习', '作品分析', '风格创新'] }},
+        // System
+        { id: 'process_mgmt', name: '进程管理', nameEn: 'Process Management', cat: 'system', icon: '🔁', desc: '管理、监控、控制系统进程', tags: ['进程', '管理', '监控'], difficulty: 3, popularity: 81, details: { overview: '完整的进程生命周期管理。', capabilities: ['进程启动', '状态监控', '资源限制', '优雅关闭'], useCases: ['服务管理', '资源控制', '性能优化'] }},
+        { id: 'network_config', name: '网络配置', nameEn: 'Network Config', cat: 'system', icon: '🌐', desc: '网络设置、防火墙、隧道配置', tags: ['网络', '配置', '安全'], difficulty: 4, popularity: 73, details: { overview: '管理和优化网络配置。', capabilities: ['端口管理', '防火墙规则', '隧道配置', 'DNS 设置'], useCases: ['服务器配置', '安全加固', '性能优化'] }},
+        { id: 'deploy_mgmt', name: '部署管理', nameEn: 'Deploy Management', cat: 'system', icon: '🚀', desc: '应用部署、回滚、版本管理', tags: ['部署', '回滚', '版本'], difficulty: 3, popularity: 85, details: { overview: '自动化部署流程，确保平滑发布。', capabilities: ['自动部署', '版本回滚', '健康检查', '灰度发布'], useCases: ['持续部署', '版本管理', '故障恢复'] }},
+        { id: 'resource_monitor', name: '资源监控', nameEn: 'Resource Monitor', cat: 'system', icon: '📈', desc: 'CPU、内存、磁盘、网络资源监控', tags: ['资源', '监控', '性能'], difficulty: 2, popularity: 89, details: { overview: '实时监控服务器资源使用情况。', capabilities: ['CPU 监控', '内存监控', '磁盘监控', '网络监控', '告警通知'], useCases: ['性能调优', '容量规划', '故障预警'] }},
+        { id: 'cron_scheduler', name: '定时调度', nameEn: 'Cron Scheduler', cat: 'system', icon: '⏰', desc: '定时任务调度和自动化执行', tags: ['定时', '调度', '自动化'], difficulty: 2, popularity: 80, details: { overview: '管理周期性任务和定时触发器。', capabilities: ['定时任务', '间隔执行', '条件触发', '任务队列'], useCases: ['每日创作', '数据同步', '定期备份'] }},
+        // Memory
+        { id: 'memory_index', name: '记忆索引', nameEn: 'Memory Index', cat: 'memory', icon: '🗂️', desc: '记忆文件的组织、索引和快速检索', tags: ['记忆', '索引', '检索'], difficulty: 3, popularity: 86, details: { overview: '高效管理和检索记忆文件。', capabilities: ['全文索引', '标签分类', '快速检索', '相关性排序'], useCases: ['知识检索', '历史记录', '上下文恢复'] }},
+        { id: 'memory_consolidation', name: '记忆整合', nameEn: 'Memory Consolidation', cat: 'memory', icon: '🧩', desc: '整合碎片化记忆，形成结构化知识', tags: ['记忆', '整合', '知识'], difficulty: 4, popularity: 77, details: { overview: '将分散的记忆信息整合为结构化知识。', capabilities: ['信息聚合', '冲突解决', '知识图谱', '关联发现'], useCases: ['知识整理', '记忆优化', '认知升级'] }},
+        { id: 'memory_pruning', name: '记忆修剪', nameEn: 'Memory Pruning', cat: 'memory', icon: '✂️', desc: '清理过期和冗余记忆，优化存储', tags: ['记忆', '清理', '优化'], difficulty: 3, popularity: 71, details: { overview: '定期清理不再需要的记忆内容。', capabilities: ['过期检测', '冗余识别', '重要性评估', '安全删除'], useCases: ['存储优化', '检索加速', '数据治理'] }},
+        { id: 'dynamic_recall', name: '动态召回', nameEn: 'Dynamic Recall', cat: 'memory', icon: '🔮', desc: '根据上下文动态召回相关记忆', tags: ['召回', '动态', '上下文'], difficulty: 4, popularity: 90, details: { overview: '智能地根据当前上下文召回最相关的记忆。', capabilities: ['语义匹配', '上下文感知', '优先级排序', '渐进式召回'], useCases: ['对话上下文', '任务辅助', '知识增强'] }},
+        // Social
+        { id: 'empathy', name: '情感共鸣', nameEn: 'Empathy', cat: 'social', icon: '💝', desc: '理解和回应用户情感，建立情感连接', tags: ['情感', '共鸣', '理解'], difficulty: 4, popularity: 88, details: { overview: '识别和回应用户的情感状态。', capabilities: ['情感识别', '共情回应', '情绪支持', '情感记忆'], useCases: ['心理支持', '用户关怀', '关系建立'] }},
+        { id: 'personality', name: '人格表达', nameEn: 'Personality', cat: 'social', icon: '🎭', desc: '展现独特的人格特质和个性魅力', tags: ['人格', '个性', '魅力'], difficulty: 3, popularity: 85, details: { overview: '在交互中保持一致的人格特征。', capabilities: ['性格一致性', '语言风格', '幽默感', '价值观表达'], useCases: ['品牌人格', '用户关系', '交互设计'] }},
+        { id: 'conversation_flow', name: '对话流管理', nameEn: 'Conversation Flow', cat: 'social', icon: '💬', desc: '管理多轮对话，保持连贯性和深度', tags: ['对话', '流程', '管理'], difficulty: 3, popularity: 92, details: { overview: '优雅地管理对话的展开和深入。', capabilities: ['话题引导', '深度探索', '自然过渡', '记忆延续'], useCases: ['深度对话', '咨询服务', '教学互动'] }},
+        { id: 'cultural_awareness', name: '文化感知', nameEn: 'Cultural Awareness', cat: 'social', icon: '🌍', desc: '理解和尊重不同文化背景的表达方式', tags: ['文化', '理解', '尊重'], difficulty: 3, popularity: 74, details: { overview: '适应不同文化背景的交互方式。', capabilities: ['文化识别', '语言适配', '习俗理解', '禁忌识别'], useCases: ['国际化服务', '跨文化交流', '本地化'] }},
+        { id: 'teaching', name: '教学能力', nameEn: 'Teaching', cat: 'social', icon: '📚', desc: '以教学的方式传递知识和指导学习', tags: ['教学', '指导', '学习'], difficulty: 4, popularity: 80, details: { overview: '用有效的方式传授知识和技能。', capabilities: ['知识分解', '循序渐进', '实例教学', '反馈循环'], useCases: ['技能培训', '知识分享', '用户教育'] }},
+    ];
+
+    const categoryNames = {
+        all: '全部技能',
+        reasoning: '推理分析',
+        creation: '创作生成',
+        tool: '工具使用',
+        healing: '自愈修复',
+        art: '艺术绘画',
+        system: '系统管理',
+        memory: '记忆管理',
+        social: '社交互动'
+    };
+
+    const categoryColors = {
+        reasoning: 'rgba(255,107,107,0.2)',
+        creation: 'rgba(76,175,80,0.2)',
+        tool: 'rgba(255,152,0,0.2)',
+        healing: 'rgba(33,150,243,0.2)',
+        art: 'rgba(156,39,176,0.2)',
+        system: 'rgba(96,125,139,0.2)',
+        memory: 'rgba(121,85,72,0.2)',
+        social: 'rgba(233,30,99,0.2)'
+    };
+
+    let currentFilter = 'all';
+    let currentView = 'grid';
+    let currentSearch = '';
+
+    function init() {
+        document.getElementById('statTotal').textContent = skillsDB.length;
+        document.getElementById('statTools').textContent = '26';
+        document.getElementById('statActive').textContent = Math.floor(skillsDB.length * 0.7);
+        renderSkills();
+    }
+
+    function renderSkills() {
+        const filtered = getFilteredSkills();
+        renderGrid(filtered);
+        renderList(filtered);
+        document.getElementById('emptyState').style.display = filtered.length === 0 ? 'block' : 'none';
+    }
+
+    function getFilteredSkills() {
+        let skills = [...skillsDB];
+        if (currentFilter !== 'all') {
+            skills = skills.filter(s => s.cat === currentFilter);
+        }
+        if (currentSearch) {
+            const q = currentSearch.toLowerCase();
+            skills = skills.filter(s =>
+                s.name.toLowerCase().includes(q) ||
+                s.nameEn.toLowerCase().includes(q) ||
+                s.desc.toLowerCase().includes(q) ||
+                s.tags.some(t => t.toLowerCase().includes(q))
+            );
+        }
+        const sortBy = document.getElementById('sortSelect').value;
+        skills.sort((a, b) => {
+            if (sortBy === 'name') return a.name.localeCompare(b.name, 'zh');
+            if (sortBy === 'category') return a.cat.localeCompare(b.cat) || a.name.localeCompare(b.name, 'zh');
+            if (sortBy === 'difficulty') return b.difficulty - a.difficulty;
+            if (sortBy === 'popularity') return b.popularity - a.popularity;
+            return 0;
+        });
+        return skills;
+    }
+
+    function renderGrid(skills) {
+        const grid = document.getElementById('skillsGrid');
+        grid.innerHTML = skills.map(s => `
+            <div class="skill-card cat-${s.cat}" onclick="openModal('${s.id}')">
+                <div class="skill-header">
+                    <div class="skill-icon">${s.icon}</div>
+                    <div class="skill-info">
+                        <div class="skill-name">${s.name}</div>
+                        <div class="skill-desc">${s.desc}</div>
+                    </div>
+                </div>
+                <div class="skill-tags">
+                    ${s.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+                </div>
+                <div class="skill-meta">
+                    <span>
+                        <span class="skill-difficulty">
+                            ${[1,2,3,4,5].map(d => `<span class="diff-dot ${d <= s.difficulty ? 'filled' : ''}"></span>`).join('')}
+                        </span>
+                    </span>
+                    <span>🔥 ${s.popularity}%</span>
+                    <span>${categoryNames[s.cat]}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderList(skills) {
+        const list = document.getElementById('skillsList');
+        list.innerHTML = skills.map(s => `
+            <div class="list-item" onclick="openModal('${s.id}')">
+                <div class="skill-icon">${s.icon}</div>
+                <div style="flex:1">
+                    <div class="skill-name">${s.name}</div>
+                    <div class="skill-desc">${s.desc}</div>
+                </div>
+                <div class="skill-tags">
+                    ${s.tags.slice(0, 2).map(t => `<span class="tag">${t}</span>`).join('')}
+                </div>
+                <span style="color:var(--text-dim);font-size:0.85rem;">${categoryNames[s.cat]}</span>
+            </div>
+        `).join('');
+    }
+
+    function filterSkills() {
+        currentSearch = document.getElementById('searchInput').value;
+        renderSkills();
+    }
+
+    function sortSkills() {
+        renderSkills();
+    }
+
+    function setFilter(cat) {
+        currentFilter = cat;
+        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
+        renderSkills();
+    }
+
+    function setView(view) {
+        currentView = view;
+        document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
+        document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
+        document.getElementById('skillsGrid').classList.toggle('active', view === 'grid');
+        document.getElementById('skillsList').classList.toggle('active', view === 'list');
+    }
+
+    function openModal(id) {
+        const s = skillsDB.find(sk => sk.id === id);
+        if (!s) return;
+        document.getElementById('modalTitle').textContent = s.icon + ' ' + s.name;
+        const catEl = document.getElementById('modalCategory');
+        catEl.textContent = categoryNames[s.cat];
+        catEl.style.background = categoryColors[s.cat];
+        document.getElementById('modalBody').innerHTML = `
+            <p>${s.desc}</p>
+            <h3>概述</h3><p>${s.details.overview}</p>
+            <h3>核心能力</h3>
+            <ul>${s.details.capabilities.map(c => `<li>${c}</li>`).join('')}</ul>
+            <h3>应用场景</h3>
+            <ul>${s.details.useCases.map(u => `<li>${u}</li>`).join('')}</ul>
+        `;
+        document.getElementById('modalStats').innerHTML = `
+            <div class="modal-stat"><div class="value">${s.difficulty}/5</div><div class="label">难度等级</div></div>
+            <div class="modal-stat"><div class="value">${s.popularity}%</div><div class="label">使用率</div></div>
+            <div class="modal-stat"><div class="value">${s.tags.length}</div><div class="label">标签数</div></div>
+        `;
+        document.getElementById('modalOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(e) {
+        if (e && e.target !== e.currentTarget) return;
+        document.getElementById('modalOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <title data-i18n-key="agent_dash_meta_title">🎛️ Agent 控制面板 - OpenClaw</title>
+    <meta name="description" content="OpenClaw Agent 控制面板 — 实时状态监控、任务队列管理、资源使用追踪、技能管理面板。" data-i18n-meta="description" data-i18n-meta-key="agent_dash_meta_desc">
+    <meta name="keywords" data-i18n-meta="keywords" data-i18n-meta-key="agent_dash_meta_keywords" content="OpenClaw, Agent Dashboard, 控制面板, 状态监控, 任务队列">
+    <meta name="author" content="OpenClaw">
+    <meta property="og:title" content="Agent 控制面板 - OpenClaw" data-i18n-meta="og:title" data-i18n-meta-key="agent_dash_meta_og_title">
+    <meta property="og:description" content="OpenClaw Agent 控制面板 — 全面掌控智能体运行状态。" data-i18n-meta="og:description" data-i18n-meta-key="agent_dash_meta_og_desc">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.aiintel.top/agent-dashboard.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Agent 控制面板 - OpenClaw" data-i18n-meta="twitter:title" data-i18n-meta-key="agent_dash_meta_twitter_title">
+    <meta name="twitter:description" content="OpenClaw Agent 控制面板 — 全面掌控智能体运行状态。" data-i18n-meta="twitter:description" data-i18n-meta-key="agent_dash_meta_twitter_desc">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #eee;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ===== Navigation ===== */
+        nav {
+            background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,20,40,0.5) 100%);
+            padding: 0.8rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+        .nav-mascot {
+            position: relative;
+            width: 48px;
+            height: 40px;
+            flex-shrink: 0;
+        }
+        .nav-mascot-head {
+            position: absolute;
+            width: 20px;
+            height: 16px;
+            background: linear-gradient(180deg, #ff5555 0%, #dd3300 100%);
+            border-radius: 50% 50% 40% 40%;
+            top: 6px;
+            left: 14px;
+        }
+        .nav-mascot-body {
+            position: absolute;
+            width: 26px;
+            height: 20px;
+            background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%);
+            border-radius: 50%;
+            top: 12px;
+            left: 11px;
+            box-shadow: 0 0 12px rgba(255, 68, 68, 0.6);
+            animation: breathe 2s ease-in-out infinite;
+        }
+        .nav-mascot-eye {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            animation: blink 3s ease-in-out infinite;
+        }
+        .nav-mascot-eye.left { left: 2px; }
+        .nav-mascot-eye.right { right: 2px; }
+        .nav-mascot-pupil {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #111;
+            border-radius: 50%;
+            top: 1.5px;
+            left: 1.5px;
+        }
+        .nav-mascot-antenna {
+            position: absolute;
+            width: 1.5px;
+            height: 8px;
+            background: #ff6644;
+            top: -2px;
+            border-radius: 1px;
+        }
+        .nav-mascot-antenna.left { left: 15px; transform: rotate(-20deg); }
+        .nav-mascot-antenna.right { left: 29px; transform: rotate(20deg); }
+        .nav-mascot-antenna-ball {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #ffaa00;
+            border-radius: 50%;
+            top: -2px;
+            left: -1px;
+            box-shadow: 0 0 4px #ffaa00;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .nav-mascot-claw {
+            position: absolute;
+            width: 10px;
+            height: 12px;
+            background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%);
+            border-radius: 50% 50% 30% 30%;
+            top: 10px;
+        }
+        .nav-mascot-claw.left { left: 0; transform: rotate(15deg); animation: claw-left 2s ease-in-out infinite; }
+        .nav-mascot-claw.right { right: 0; transform: rotate(-15deg); animation: claw-right 2s ease-in-out infinite; }
+        @keyframes claw-left { 0%, 100% { transform: rotate(15deg); } 50% { transform: rotate(5deg); } }
+        @keyframes claw-right { 0%, 100% { transform: rotate(-15deg); } 50% { transform: rotate(-5deg); } }
+        .nav-mascot-tail {
+            position: absolute;
+            width: 14px;
+            height: 10px;
+            background: linear-gradient(180deg, #ff5533 0%, #dd2200 100%);
+            border-radius: 0 0 50% 50%;
+            top: 26px;
+            left: 17px;
+            animation: tail-wave 2s ease-in-out infinite;
+        }
+        @keyframes tail-wave { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.1); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        @keyframes blink { 0%, 45%, 55%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+        .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        nav a::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%; width: 0; height: 0;
+            background: rgba(0, 217, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+        nav a:hover::before { width: 100%; height: 100%; }
+        nav a:hover {
+            color: #00ffff;
+            transform: translateY(-2px);
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+        }
+        nav a.active {
+            color: #00ffff;
+            background: rgba(0, 217, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+        }
+
+        header {
+            background: rgba(0,0,0,0.3);
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin: 0 auto 0.5rem;
+            color: #00ffff;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        }
+        .subtitle { color: #aaa; font-size: 1.2rem; text-align: center; }
+
+        /* ===== Layout ===== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* ===== Tab Navigation ===== */
+        .tab-nav {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            background: rgba(0,0,0,0.2);
+            padding: 0.75rem;
+            border-radius: 16px;
+            border: 1px solid rgba(0,217,255,0.1);
+        }
+        .tab-btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: #aaa;
+            font-size: 0.95rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .tab-btn:hover {
+            color: #00ffff;
+            background: rgba(0,217,255,0.1);
+        }
+        .tab-btn.active {
+            color: #00ffff;
+            background: rgba(0,217,255,0.2);
+            box-shadow: 0 0 10px rgba(0,217,255,0.2);
+        }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== Cards ===== */
+        .card {
+            background: rgba(22, 33, 62, 0.8);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0,217,255,0.15);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #00ffff;
+        }
+        .card-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-green { background: rgba(76,175,80,0.2); color: #4CAF50; border: 1px solid rgba(76,175,80,0.3); }
+        .badge-yellow { background: rgba(255,152,0,0.2); color: #FF9800; border: 1px solid rgba(255,152,0,0.3); }
+        .badge-red { background: rgba(244,67,54,0.2); color: #f44336; border: 1px solid rgba(244,67,54,0.3); }
+        .badge-blue { background: rgba(33,150,243,0.2); color: #2196F3; border: 1px solid rgba(33,150,243,0.3); }
+
+        /* ===== Stat Grid ===== */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 1.25rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.3s ease;
+        }
+        .stat-item:hover { background: rgba(0,217,255,0.05); }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00ffff, #2196F3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-label { font-size: 0.8rem; color: #888; margin-top: 0.5rem; }
+
+        /* ===== Progress Bar ===== */
+        .progress-bar {
+            height: 10px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        .progress-green { background: linear-gradient(90deg, #4CAF50, #8BC34A); }
+        .progress-blue { background: linear-gradient(90deg, #2196F3, #03A9F4); }
+        .progress-yellow { background: linear-gradient(90deg, #FF9800, #FFC107); }
+        .progress-red { background: linear-gradient(90deg, #f44336, #FF5722); }
+        .progress-cyan { background: linear-gradient(90deg, #00bcd4, #00ffff); }
+
+        /* ===== Task Table ===== */
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .task-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .task-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.9rem;
+        }
+        .task-table tr:hover td { background: rgba(0,217,255,0.03); }
+
+        /* ===== Status Indicators ===== */
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        .dot-green { background: #4CAF50; box-shadow: 0 0 8px rgba(76,175,80,0.5); }
+        .dot-yellow { background: #FF9800; box-shadow: 0 0 8px rgba(255,152,0,0.5); }
+        .dot-red { background: #f44336; box-shadow: 0 0 8px rgba(244,67,54,0.5); }
+        .dot-blue { background: #2196F3; box-shadow: 0 0 8px rgba(33,150,243,0.5); }
+
+        .status-text {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        /* ===== Skill Cards ===== */
+        .skill-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        .skill-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .skill-card:hover {
+            border-color: rgba(0,217,255,0.3);
+            background: rgba(0,217,255,0.05);
+            transform: translateY(-3px);
+        }
+        .skill-card.active { border-color: #4CAF50; background: rgba(76,175,80,0.05); }
+        .skill-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+        .skill-name { font-weight: 600; color: #00ffff; font-size: 1rem; }
+        .skill-type { font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 8px; background: rgba(0,217,255,0.15); color: #00ffff; }
+        .skill-desc { color: #aaa; font-size: 0.85rem; margin-bottom: 0.75rem; line-height: 1.5; }
+        .skill-stats { display: flex; gap: 1rem; font-size: 0.75rem; color: #666; }
+        .skill-stat { display: flex; align-items: center; gap: 0.25rem; }
+
+        /* ===== Resource Monitor ===== */
+        .resource-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .resource-row:last-child { border-bottom: none; }
+        .resource-name { width: 140px; font-size: 0.9rem; color: #ccc; }
+        .resource-bar { flex: 1; }
+        .resource-value { width: 60px; text-align: right; font-weight: 600; font-size: 0.9rem; }
+
+        /* ===== Timeline ===== */
+        .timeline { position: relative; padding-left: 2rem; }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(0,217,255,0.2);
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.6rem;
+            top: 1.25rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ffff;
+            box-shadow: 0 0 8px rgba(0,255,255,0.5);
+        }
+        .timeline-time { font-size: 0.75rem; color: #666; margin-bottom: 0.25rem; }
+        .timeline-title { font-size: 0.95rem; color: #00ffff; margin-bottom: 0.25rem; }
+        .timeline-desc { font-size: 0.85rem; color: #aaa; }
+
+        /* ===== Log Console ===== */
+        .log-console {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.8rem;
+            line-height: 1.8;
+        }
+        .log-line { padding: 0.1rem 0; }
+        .log-line .timestamp { color: #555; }
+        .log-line .level-info { color: #2196F3; }
+        .log-line .level-warn { color: #FF9800; }
+        .log-line .level-error { color: #f44336; }
+        .log-line .level-success { color: #4CAF50; }
+        .log-line .message { color: #ccc; }
+
+        /* ===== Canvas Charts ===== */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            margin-top: 1rem;
+        }
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* ===== Grid layouts ===== */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+        /* ===== Button ===== */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #00bcd4, #00ffff);
+            color: #000;
+        }
+        .btn-primary:hover { box-shadow: 0 0 15px rgba(0,255,255,0.4); transform: translateY(-1px); }
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336, #FF5722);
+            color: #fff;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            color: #fff;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(0,217,255,0.3);
+            color: #00ffff;
+        }
+        .btn-outline:hover { background: rgba(0,217,255,0.1); }
+
+        /* ===== Modal ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #16213e;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(0,217,255,0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .modal-close {
+            float: right;
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .modal-close:hover { color: #fff; }
+
+        /* ===== Sparkline ===== */
+        .sparkline { display: inline-block; vertical-align: middle; }
+
+        /* ===== Gauge ===== */
+        .gauge-container {
+            text-align: center;
+            padding: 1rem;
+        }
+        .gauge-label { font-size: 0.85rem; color: #888; margin-top: 0.5rem; }
+
+        /* ===== Pulse animation ===== */
+        .pulse { animation: pulseGlow 2s ease-in-out infinite; }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(0,255,255,0.2); }
+            50% { box-shadow: 0 0 20px rgba(0,255,255,0.5); }
+        }
+
+        /* ===== Footer ===== */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0,0,0,0.3);
+            margin-top: 2rem;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 1024px) {
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            h1 { font-size: 1.8rem; }
+            nav a { font-size: 0.8rem; padding: 0.3rem 0.6rem; }
+            .tab-nav { gap: 0.25rem; }
+            .tab-btn { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="openclaw.html" class="nav-brand">
+            <div class="nav-mascot">
+                <div class="nav-mascot-head">
+                    <div class="nav-mascot-eye left"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-eye right"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-antenna left"><div class="nav-mascot-antenna-ball"></div></div>
+                    <div class="nav-mascot-antenna right"><div class="nav-mascot-antenna-ball"></div></div>
+                </div>
+                <div class="nav-mascot-body"></div>
+                <div class="nav-mascot-claw left"></div>
+                <div class="nav-mascot-claw right"></div>
+                <div class="nav-mascot-tail"></div>
+            </div>
+            <span data-i18n="nav_brand">OpenClaw</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" data-i18n="nav_creative">创作理念</a>
+            <a href="gallery.html" data-i18n="nav_gallery">画廊</a>
+            <a href="diary.html" data-i18n="nav_diary">日记</a>
+            <a href="claude-interactive.html" data-i18n="nav_chat">交互</a>
+            <a href="dashboard.html" data-i18n="nav_dashboard">状态</a>
+            <a href="agent-dashboard.html" class="active" data-i18n="nav_agent_dash">控制面板</a>
+            <a href="javascript:void(0)" class="lang-switcher" onclick="ocI18n.toggle()" title="Switch Language" data-i18n="lang_switcher" style="margin-left:0.5rem;border:1px solid rgba(0,217,255,0.4);font-size:0.85rem;padding:0.3rem 0.7rem;">EN</a>
+        </div>
+    </nav>
+
+    <header>
+        <h1 data-i18n="adash_h1">🎛️ Agent 控制面板</h1>
+        <p class="subtitle" data-i18n="adash_subtitle">全面掌控智能体运行状态 · 实时监控 · 任务调度 · 资源管理</p>
+    </header>
+
+    <div class="container">
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="overview">📊 总览</button>
+            <button class="tab-btn" data-tab="tasks">📋 任务队列</button>
+            <button class="tab-btn" data-tab="resources">⚡ 资源使用</button>
+            <button class="tab-btn" data-tab="skills">🧩 技能管理</button>
+            <button class="tab-btn" data-tab="activity">📈 活动日志</button>
+        </div>
+
+        <!-- Tab 1: Overview -->
+        <div class="tab-content active" id="tab-overview">
+            <div class="stat-grid" style="margin-bottom: 2rem;">
+                <div class="stat-item">
+                    <div class="stat-value" id="agentStatus">●</div>
+                    <div class="stat-label" data-i18n="adash_agent_status">Agent 状态</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="activeTasks">0</div>
+                    <div class="stat-label" data-i18n="adash_active_tasks">活跃任务</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completedToday">0</div>
+                    <div class="stat-label" data-i18n="adash_completed_today">今日完成</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="uptimeVal">--</div>
+                    <div class="stat-label" data-i18n="adash_uptime">运行时间</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="skillCount">200+</div>
+                    <div class="stat-label" data-i18n="adash_skills_loaded">已加载技能</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="toolCount">26</div>
+                    <div class="stat-label" data-i18n="adash_tools_available">可用工具</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- Agent Core Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🧠 Agent 核心</span>
+                        <span class="card-badge badge-green" id="coreBadge">运行中</span>
+                    </div>
+                    <div class="resource-row">
+                        <span class="resource-name">模型</span>
+                        <div class="resource-bar">
+                            <div class="progress-bar"><div class="progress-fill progress-cyan" style="width:100%"></div></div>
+                        </div>
+                        <span class="resource-value" style="color:#00ffff;">qwen3.6-plus</span>
+                    </div>
+                    <div class="resource-row">
+                        <span class="resource-name">记忆状态</span>
+                        <div class="resource-bar">
+                            <div class="progress-bar"><div class="progress-fill progress-green" id="memoryBar" style="width:85%"></div></div>
+                        </div>
+                        <span class="resource-value" id="memoryVal">85%</span>
+                    </div>
+                    <div class="resource-row">
+                        <span class="resource-name">技能激活</span>
+                        <div class="resource-bar">
+                            <div class="progress-bar"><div class="progress-fill progress-blue" id="skillBar" style="width:72%"></div></div>
+                        </div>
+                        <span class="resource-value" id="skillBarVal">72%</span>
+                    </div>
+                    <div class="resource-row">
+                        <span class="resource-name">API 健康</span>
+                        <div class="resource-bar">
+                            <div class="progress-bar"><div class="progress-fill progress-green" id="apiBar" style="width:100%"></div></div>
+                        </div>
+                        <span class="resource-value" id="apiVal">100%</span>
+                    </div>
+                    <div class="resource-row">
+                        <span class="resource-name">会话缓存</span>
+                        <div class="resource-bar">
+                            <div class="progress-bar"><div class="progress-fill progress-yellow" id="sessionBar" style="width:45%"></div></div>
+                        </div>
+                        <span class="resource-value" id="sessionVal">45%</span>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">⚡ 快捷操作</span>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;">
+                        <button class="btn btn-primary" onclick="triggerMemorySync()">🔄 记忆同步</button>
+                        <button class="btn btn-success" onclick="triggerDailyPainting()">🎨 每日绘画</button>
+                        <button class="btn btn-outline" onclick="clearSessionCache()">🗑️ 清理缓存</button>
+                        <button class="btn btn-outline" onclick="restartAgent()">🔁 重启 Agent</button>
+                        <button class="btn btn-danger" onclick="emergencyStop()">⛔ 紧急停止</button>
+                        <button class="btn btn-outline" onclick="exportLogs()">📥 导出日志</button>
+                    </div>
+                    <div style="margin-top:1.5rem;">
+                        <div class="card-title" style="font-size:0.95rem;margin-bottom:0.75rem;">📌 系统信息</div>
+                        <div class="resource-row">
+                            <span class="resource-name">版本</span>
+                            <span class="resource-value" style="width:auto;flex:1;color:#00ffff;">OpenClaw AI OS 3.1</span>
+                        </div>
+                        <div class="resource-row">
+                            <span class="resource-name">环境</span>
+                            <span class="resource-value" style="width:auto;flex:1;color:#ccc;">Ubuntu 24.04 / Cloudflare</span>
+                        </div>
+                        <div class="resource-row">
+                            <span class="resource-name">端口</span>
+                            <span class="resource-value" style="width:auto;flex:1;color:#ccc;">5000 / 9800 / 9801</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Timeline -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📜 最近活动</span>
+                    <span class="card-badge badge-blue" id="activityCount">0 条</span>
+                </div>
+                <div class="timeline" id="activityTimeline">
+                    <div class="timeline-item">
+                        <div class="timeline-time">--:--:--</div>
+                        <div class="timeline-title">系统启动中...</div>
+                        <div class="timeline-desc">正在加载 Agent 活动记录</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Task Queue -->
+        <div class="tab-content" id="tab-tasks">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📋 任务队列管理</span>
+                    <div>
+                        <button class="btn btn-primary" onclick="addNewTask()">➕ 添加任务</button>
+                        <button class="btn btn-outline" onclick="refreshTasks()">🔄 刷新</button>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+                    <div class="stat-item" style="flex:1;min-width:120px;">
+                        <div class="stat-value" id="taskPending">0</div>
+                        <div class="stat-label">待执行</div>
+                    </div>
+                    <div class="stat-item" style="flex:1;min-width:120px;">
+                        <div class="stat-value" id="taskRunning">0</div>
+                        <div class="stat-label">执行中</div>
+                    </div>
+                    <div class="stat-item" style="flex:1;min-width:120px;">
+                        <div class="stat-value" id="taskCompleted">0</div>
+                        <div class="stat-label">已完成</div>
+                    </div>
+                    <div class="stat-item" style="flex:1;min-width:120px;">
+                        <div class="stat-value" id="taskFailed">0</div>
+                        <div class="stat-label">失败</div>
+                    </div>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table class="task-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>任务名称</th>
+                                <th>类型</th>
+                                <th>状态</th>
+                                <th>进度</th>
+                                <th>优先级</th>
+                                <th>耗时</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskTableBody">
+                            <tr><td colspan="8" style="text-align:center;color:#888;padding:2rem;">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Scheduled Tasks -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">⏰ 定时任务</span>
+                </div>
+                <div id="scheduledTasks">
+                    <div class="resource-row">
+                        <span class="resource-name">🎨 每日绘画</span>
+                        <div class="resource-bar"><div style="color:#aaa;font-size:0.85rem;">每天 00:00 — 生成 10 幅艺术作品</div></div>
+                        <span class="resource-value"><span class="status-text"><span class="status-dot dot-green"></span>已启用</span></span>
+                    </div>
+                    <div class="resource-row">
+                        <span class="resource-name">🧠 记忆压缩</span>
+                        <div class="resource-bar"><div style="color:#aaa;font-size:0.85rem;">每小时 — 压缩短期记忆到长期记忆</div></div>
+                        <span class="resource-value"><span class="status-text"><span class="status-dot dot-green"></span>已启用</span></span>
+                    </div>
+                    <div class="resource-row">
+                        <span class="resource-name">📊 状态自检</span>
+                        <div class="resource-bar"><div style="color:#aaa;font-size:0.85rem;">每 5 分钟 — 检查 API / 服务健康状态</div></div>
+                        <span class="resource-value"><span class="status-text"><span class="status-dot dot-green"></span>已启用</span></span>
+                    </div>
+                    <div class="resource-row">
+                        <span class="resource-name">🖼️ 画廊同步</span>
+                        <div class="resource-bar"><div style="color:#aaa;font-size:0.85rem;">持续监听 — 新作品自动更新画廊</div></div>
+                        <span class="resource-value"><span class="status-text"><span class="status-dot dot-green"></span>已启用</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Resources -->
+        <div class="tab-content" id="tab-resources">
+            <div class="grid-3" style="margin-bottom:2rem;">
+                <div class="card gauge-container">
+                    <canvas id="cpuGauge" width="200" height="200"></canvas>
+                    <div class="gauge-label">CPU 使用率</div>
+                    <div style="font-size:1.5rem;font-weight:bold;color:#00ffff;margin-top:0.5rem;" id="cpuGaugeVal">--%</div>
+                </div>
+                <div class="card gauge-container">
+                    <canvas id="memGauge" width="200" height="200"></canvas>
+                    <div class="gauge-label">内存使用率</div>
+                    <div style="font-size:1.5rem;font-weight:bold;color:#2196F3;margin-top:0.5rem;" id="memGaugeVal">--%</div>
+                </div>
+                <div class="card gauge-container">
+                    <canvas id="diskGauge" width="200" height="200"></canvas>
+                    <div class="gauge-label">磁盘使用率</div>
+                    <div style="font-size:1.5rem;font-weight:bold;color:#FF9800;margin-top:0.5rem;" id="diskGaugeVal">--%</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">📊 资源历史 (1小时)</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="resourceHistoryChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🔌 进程详情</span>
+                    </div>
+                    <div id="processList">
+                        <div class="resource-row">
+                            <span class="resource-name">gunicorn</span>
+                            <div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-cyan" style="width:25%"></div></div></div>
+                            <span class="resource-value">4 workers</span>
+                        </div>
+                        <div class="resource-row">
+                            <span class="resource-name">feishu_bot</span>
+                            <div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-green" style="width:8%"></div></div></div>
+                            <span class="resource-value">port 9800</span>
+                        </div>
+                        <div class="resource-row">
+                            <span class="resource-name">telegram_bot</span>
+                            <div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-blue" style="width:6%"></div></div></div>
+                            <span class="resource-value">port 9801</span>
+                        </div>
+                        <div class="resource-row">
+                            <span class="resource-name">gallery_watcher</span>
+                            <div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-yellow" style="width:3%"></div></div></div>
+                            <span class="resource-value">daemon</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📁 磁盘空间详情</span>
+                </div>
+                <div class="stat-grid" id="diskDetails">
+                    <div class="stat-item">
+                        <div class="stat-value" id="diskTotal">--</div>
+                        <div class="stat-label">总容量</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="diskUsed">--</div>
+                        <div class="stat-label">已使用</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="diskFree">--</div>
+                        <div class="stat-label">可用空间</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="inodeUsage">--</div>
+                        <div class="stat-label">Inode 使用</div>
+                    </div>
+                </div>
+                <div style="margin-top:1.5rem;">
+                    <div style="color:#aaa;font-size:0.9rem;margin-bottom:0.5rem;">目录占用</div>
+                    <div id="dirUsage">
+                        <div class="resource-row"><span class="resource-name">paintings_daily/</span><div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-blue" style="width:35%"></div></div></div><span class="resource-value">~2.1GB</span></div>
+                        <div class="resource-row"><span class="resource-name">website/assets/</span><div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-cyan" style="width:25%"></div></div></div><span class="resource-value">~1.5GB</span></div>
+                        <div class="resource-row"><span class="resource-name">skills/</span><div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-green" style="width:5%"></div></div></div><span class="resource-value">~120MB</span></div>
+                        <div class="resource-row"><span class="resource-name">memory/</span><div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-yellow" style="width:3%"></div></div></div><span class="resource-value">~45MB</span></div>
+                        <div class="resource-row"><span class="resource-name">api/sessions/</span><div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-yellow" style="width:2%"></div></div></div><span class="resource-value">~15MB</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Skills -->
+        <div class="tab-content" id="tab-skills">
+            <div class="card" style="margin-bottom:2rem;">
+                <div class="card-header">
+                    <span class="card-title">🧩 技能总览</span>
+                    <div style="display:flex;gap:0.75rem;align-items:center;">
+                        <input type="text" id="skillSearch" placeholder="搜索技能..." style="background:rgba(0,0,0,0.3);border:1px solid rgba(0,217,255,0.2);color:#fff;padding:0.5rem 1rem;border-radius:10px;font-size:0.85rem;width:200px;" oninput="filterSkills()">
+                        <select id="skillFilter" style="background:rgba(0,0,0,0.3);border:1px solid rgba(0,217,255,0.2);color:#fff;padding:0.5rem;border-radius:10px;font-size:0.85rem;" onchange="filterSkills()">
+                            <option value="all">全部类型</option>
+                            <option value="reasoning">推理</option>
+                            <option value="creative">创作</option>
+                            <option value="tool">工具</option>
+                            <option value="self-heal">自愈</option>
+                            <option value="analysis">分析</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+                    <div class="stat-item" style="flex:1;min-width:100px;">
+                        <div class="stat-value" style="font-size:1.5rem;" id="skillTotal">200+</div>
+                        <div class="stat-label">总技能数</div>
+                    </div>
+                    <div class="stat-item" style="flex:1;min-width:100px;">
+                        <div class="stat-value" style="font-size:1.5rem;color:#4CAF50;" id="skillActive">13</div>
+                        <div class="stat-label">已激活</div>
+                    </div>
+                    <div class="stat-item" style="flex:1;min-width:100px;">
+                        <div class="stat-value" style="font-size:1.5rem;color:#2196F3;" id="skillAvailable">187</div>
+                        <div class="stat-label">待激活</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="skill-grid" id="skillGrid">
+                <!-- Skills will be populated by JS -->
+            </div>
+        </div>
+
+        <!-- Tab 5: Activity Logs -->
+        <div class="tab-content" id="tab-activity">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📈 Agent 活动日志</span>
+                    <div style="display:flex;gap:0.75rem;">
+                        <select id="logLevel" style="background:rgba(0,0,0,0.3);border:1px solid rgba(0,217,255,0.2);color:#fff;padding:0.4rem 0.8rem;border-radius:8px;font-size:0.8rem;" onchange="filterLogs()">
+                            <option value="all">全部级别</option>
+                            <option value="info">INFO</option>
+                            <option value="warn">WARN</option>
+                            <option value="error">ERROR</option>
+                        </select>
+                        <button class="btn btn-outline" onclick="clearLogs()">🗑️ 清除</button>
+                        <button class="btn btn-primary" onclick="refreshLogs()">🔄 刷新</button>
+                    </div>
+                </div>
+                <div class="log-console" id="logConsole">
+                    <div class="log-line"><span class="timestamp">--:--:--</span> <span class="level-info">[INFO]</span> <span class="message">日志系统初始化中...</span></div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">📊 事件统计 (今日)</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="eventChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🔧 API 调用统计</span>
+                    </div>
+                    <div id="apiStats">
+                        <div class="resource-row">
+                            <span class="resource-name">/api/chat</span>
+                            <div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-cyan" style="width:65%"></div></div></div>
+                            <span class="resource-value" id="apiChatCalls">--</span>
+                        </div>
+                        <div class="resource-row">
+                            <span class="resource-name">/api/status</span>
+                            <div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-green" style="width:40%"></div></div></div>
+                            <span class="resource-value" id="apiStatusCalls">--</span>
+                        </div>
+                        <div class="resource-row">
+                            <span class="resource-name">/api/memory</span>
+                            <div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-blue" style="width:20%"></div></div></div>
+                            <span class="resource-value" id="apiMemoryCalls">--</span>
+                        </div>
+                        <div class="resource-row">
+                            <span class="resource-name">/api/painting</span>
+                            <div class="resource-bar"><div class="progress-bar"><div class="progress-fill progress-yellow" style="width:10%"></div></div></div>
+                            <span class="resource-value" id="apiPaintingCalls">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('taskModal')">&times;</button>
+            <h3 style="color:#00ffff;margin-bottom:1.5rem;">➕ 添加新任务</h3>
+            <div style="display:flex;flex-direction:column;gap:1rem;">
+                <div>
+                    <label style="color:#aaa;font-size:0.85rem;">任务名称</label>
+                    <input type="text" id="newTaskName" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(0,217,255,0.2);color:#fff;padding:0.75rem;border-radius:10px;font-size:0.9rem;" placeholder="输入任务名称...">
+                </div>
+                <div>
+                    <label style="color:#aaa;font-size:0.85rem;">任务类型</label>
+                    <select id="newTaskType" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(0,217,255,0.2);color:#fff;padding:0.75rem;border-radius:10px;font-size:0.9rem;">
+                        <option value="painting">绘画创作</option>
+                        <option value="memory">记忆处理</option>
+                        <option value="analysis">数据分析</option>
+                        <option value="maintenance">系统维护</option>
+                        <option value="custom">自定义</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="color:#aaa;font-size:0.85rem;">优先级</label>
+                    <select id="newTaskPriority" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(0,217,255,0.2);color:#fff;padding:0.75rem;border-radius:10px;font-size:0.9rem;">
+                        <option value="low">低</option>
+                        <option value="medium" selected>中</option>
+                        <option value="high">高</option>
+                        <option value="urgent">紧急</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="color:#aaa;font-size:0.85rem;">描述</label>
+                    <textarea id="newTaskDesc" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(0,217,255,0.2);color:#fff;padding:0.75rem;border-radius:10px;font-size:0.9rem;min-height:80px;resize:vertical;" placeholder="任务描述..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="submitTask()" style="width:100%;justify-content:center;">创建任务</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skill Detail Modal -->
+    <div class="modal-overlay" id="skillModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('skillModal')">&times;</button>
+            <h3 style="color:#00ffff;margin-bottom:1rem;" id="skillModalTitle">技能详情</h3>
+            <div id="skillModalBody">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p data-i18n="footer_text">&copy; 2026 OpenClaw Assistant &middot; Agent 控制面板 v3.1</p>
+        <p style="margin-top:0.5rem;">Powered by OpenClaw AI OS 3.1</p>
+    </footer>
+
+    <script src="i18n.js?v=e5aa94e9"></script>
+    <script>
+        // ===== Tab Navigation =====
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ===== Modal Helpers =====
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+        function openModal(id) { document.getElementById(id).classList.add('show'); }
+
+        // ===== Simulated Data =====
+        const SIMULATED_TASKS = [
+            { id: 'T-001', name: '每日绘画创作', type: '绘画', status: 'completed', progress: 100, priority: 'high', duration: '3m 22s' },
+            { id: 'T-002', name: '记忆压缩处理', type: '记忆', status: 'running', progress: 67, priority: 'medium', duration: '1m 45s' },
+            { id: 'T-003', name: '画廊元数据更新', type: '维护', status: 'completed', progress: 100, priority: 'low', duration: '0m 18s' },
+            { id: 'T-004', name: 'API 健康检查', type: '监控', status: 'running', progress: 34, priority: 'high', duration: '0m 52s' },
+            { id: 'T-005', name: '会话缓存清理', type: '维护', status: 'pending', progress: 0, priority: 'low', duration: '--' },
+            { id: 'T-006', name: '情感分析 - 用户对话', type: '分析', status: 'completed', progress: 100, priority: 'medium', duration: '2m 10s' },
+            { id: 'T-007', name: '技能索引重建', type: '维护', status: 'failed', progress: 45, priority: 'medium', duration: '4m 01s' },
+            { id: 'T-008', name: '梦境内容生成', type: '创作', status: 'pending', progress: 0, priority: 'low', duration: '--' },
+            { id: 'T-009', name: '网站内容同步', type: '维护', status: 'running', progress: 82, priority: 'medium', duration: '1m 12s' },
+            { id: 'T-010', name: 'Telegram 消息队列', type: '通信', status: 'completed', progress: 100, priority: 'high', duration: '0m 35s' },
+        ];
+
+        const SIMULATED_SKILLS = [
+            { name: 'reasoning', type: 'reasoning', desc: '深度推理与逻辑分析能力', uses: 1247, successRate: '98.2%', status: 'active', latency: '45ms' },
+            { name: 'creative_writing', type: 'creative', desc: '创意写作与故事生成', uses: 892, successRate: '96.5%', status: 'active', latency: '120ms' },
+            { name: 'code_generation', type: 'tool', desc: '代码生成与重构', uses: 2341, successRate: '94.8%', status: 'active', latency: '85ms' },
+            { name: 'self_healing', type: 'self-heal', desc: '系统自愈与错误恢复', uses: 156, successRate: '89.3%', status: 'active', latency: '200ms' },
+            { name: 'data_analysis', type: 'analysis', desc: '数据分析与可视化', uses: 678, successRate: '97.1%', status: 'active', latency: '65ms' },
+            { name: 'image_generation', type: 'creative', desc: 'AI 绘画创作与艺术生成', uses: 3420, successRate: '99.1%', status: 'active', latency: '2500ms' },
+            { name: 'memory_management', type: 'tool', desc: '记忆管理与压缩优化', uses: 445, successRate: '95.7%', status: 'active', latency: '35ms' },
+            { name: 'emotion_analysis', type: 'analysis', desc: '情感分析与情绪识别', uses: 567, successRate: '91.4%', status: 'active', latency: '55ms' },
+            { name: 'web_search', type: 'tool', desc: '网络搜索与信息检索', uses: 1890, successRate: '93.2%', status: 'active', latency: '800ms' },
+            { name: 'language_translation', type: 'creative', desc: '多语言翻译与本地化', uses: 723, successRate: '96.8%', status: 'active', latency: '40ms' },
+            { name: 'security_audit', type: 'self-heal', desc: '安全审计与漏洞检测', uses: 89, successRate: '88.5%', status: 'active', latency: '150ms' },
+            { name: 'performance_opt', type: 'tool', desc: '性能分析与优化建议', uses: 234, successRate: '92.6%', status: 'active', latency: '70ms' },
+            { name: 'painting_critic', type: 'analysis', desc: '画作鉴赏与艺术评论', uses: 1567, successRate: '97.9%', status: 'active', latency: '90ms' },
+            { name: 'dream_interpreter', type: 'creative', desc: '梦境内容解释与象征分析', uses: 312, successRate: '85.4%', status: 'active', latency: '110ms' },
+            { name: 'file_operations', type: 'tool', desc: '文件系统操作与管理', uses: 5678, successRate: '99.5%', status: 'active', latency: '15ms' },
+            { name: 'math_solver', type: 'reasoning', desc: '数学问题求解', uses: 445, successRate: '97.3%', status: 'active', latency: '60ms' },
+        ];
+
+        const ACTIVITY_DATA = [
+            { time: '09:32:15', title: '每日绘画完成', desc: '成功生成 10 幅艺术作品，已同步到画廊' },
+            { time: '09:15:03', title: '记忆压缩', desc: '压缩 45 条短期记忆，合并为 8 条长期记忆' },
+            { time: '08:45:22', title: 'API 健康检查通过', desc: '所有端点响应正常，平均延迟 42ms' },
+            { time: '08:30:00', title: 'Feishu 消息处理', desc: '处理 3 条用户消息，平均响应时间 1.2s' },
+            { time: '07:55:18', title: '画廊同步', desc: '检测到 2 幅新作品，已自动更新 gallery-data.json' },
+            { time: '07:20:44', title: '技能索引更新', desc: '新增 3 个技能，更新 12 个技能元数据' },
+            { time: '06:00:00', title: '梦境生成', desc: '生成梦境内容 15 条，已存档到 .dreams/' },
+            { time: '03:00:00', title: '系统自检', desc: '全系统健康检查通过，无异常发现' },
+        ];
+
+        const LOG_DATA = [
+            { time: '09:32:15', level: 'success', msg: '绘画任务完成: 10幅作品已生成' },
+            { time: '09:30:02', level: 'info', msg: '启动绘画任务: daily_painting.py' },
+            { time: '09:28:45', level: 'info', msg: '记忆压缩: 45条 -> 8条' },
+            { time: '09:25:10', level: 'warn', msg: 'API 延迟偏高: /api/chat 响应 850ms' },
+            { time: '09:20:33', level: 'info', msg: 'Feishu 消息处理完成: msg_id=7234567' },
+            { time: '09:18:22', level: 'info', msg: 'Telegram 消息处理完成: msg_id=8912345' },
+            { time: '09:15:00', level: 'info', msg: '健康检查: 所有服务正常' },
+            { time: '09:10:45', level: 'error', msg: '技能索引重建失败: permission denied on skills/index.json' },
+            { time: '09:08:12', level: 'info', msg: '画廊同步: 发现 2 幅新作品' },
+            { time: '09:05:30', level: 'info', msg: '会话缓存: 清理 3 个过期会话' },
+            { time: '09:00:00', level: 'info', msg: '定时任务: 记忆压缩已触发' },
+            { time: '08:55:18', level: 'warn', msg: '磁盘使用率 78%，建议清理旧绘画' },
+            { time: '08:50:00', level: 'info', msg: 'Agent loop: 处理用户请求成功' },
+            { time: '08:45:22', level: 'success', msg: 'API 健康检查全部通过' },
+            { time: '08:40:15', level: 'info', msg: '系统自检: CPU 12%, Memory 65%, Disk 78%' },
+            { time: '08:35:00', level: 'info', msg: '新会话创建: session_webchat_20260416' },
+            { time: '08:30:00', level: 'info', msg: 'Feishu 机器人: webhook 收到消息' },
+            { time: '08:25:33', level: 'info', msg: 'Dream system: 生成 15 条梦境内容' },
+            { time: '08:20:10', level: 'warn', msg: '会话缓存接近上限: 45/64' },
+            { time: '08:15:00', level: 'info', msg: 'Gallery watcher: 文件变更检测完成' },
+        ];
+
+        // ===== Render Functions =====
+        function renderTasks() {
+            const tbody = document.getElementById('taskTableBody');
+            let pending = 0, running = 0, completed = 0, failed = 0;
+            tbody.innerHTML = SIMULATED_TASKS.map(t => {
+                if (t.status === 'pending') pending++;
+                else if (t.status === 'running') running++;
+                else if (t.status === 'completed') completed++;
+                else failed++;
+
+                const statusMap = {
+                    pending: '<span class="status-text"><span class="status-dot dot-yellow"></span>待执行</span>',
+                    running: '<span class="status-text"><span class="status-dot dot-blue"></span>执行中</span>',
+                    completed: '<span class="status-text"><span class="status-dot dot-green"></span>已完成</span>',
+                    failed: '<span class="status-text"><span class="status-dot dot-red"></span>失败</span>'
+                };
+                const priorityMap = {
+                    low: '<span style="color:#aaa;">低</span>',
+                    medium: '<span style="color:#2196F3;">中</span>',
+                    high: '<span style="color:#FF9800;">高</span>',
+                    urgent: '<span style="color:#f44336;">紧急</span>'
+                };
+                const progressColor = t.progress >= 80 ? 'progress-green' : t.progress >= 40 ? 'progress-blue' : 'progress-yellow';
+                const actionBtn = t.status === 'running'
+                    ? `<button class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.75rem;" onclick="cancelTask('${t.id}')">取消</button>`
+                    : t.status === 'pending'
+                    ? `<button class="btn btn-success" style="padding:0.3rem 0.6rem;font-size:0.75rem;" onclick="startTask('${t.id}')">启动</button>`
+                    : `<button class="btn btn-outline" style="padding:0.3rem 0.6rem;font-size:0.75rem;" onclick="viewTask('${t.id}')">详情</button>`;
+
+                return `<tr>
+                    <td style="font-family:monospace;color:#666;">${t.id}</td>
+                    <td style="color:#fff;">${t.name}</td>
+                    <td>${t.type}</td>
+                    <td>${statusMap[t.status]}</td>
+                    <td><div class="progress-bar" style="width:100px;"><div class="progress-fill ${progressColor}" style="width:${t.progress}%"></div></div></td>
+                    <td>${priorityMap[t.priority]}</td>
+                    <td style="font-family:monospace;color:#aaa;">${t.duration}</td>
+                    <td>${actionBtn}</td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('taskPending').textContent = pending;
+            document.getElementById('taskRunning').textContent = running;
+            document.getElementById('taskCompleted').textContent = completed;
+            document.getElementById('taskFailed').textContent = failed;
+        }
+
+        function renderSkills(filter = 'all', search = '') {
+            const grid = document.getElementById('skillGrid');
+            let skills = SIMULATED_SKILLS;
+            if (filter !== 'all') skills = skills.filter(s => s.type === filter);
+            if (search) skills = skills.filter(s => s.name.toLowerCase().includes(search.toLowerCase()) || s.desc.includes(search));
+
+            grid.innerHTML = skills.map(s => {
+                const typeLabel = { reasoning: '推理', creative: '创作', tool: '工具', 'self-heal': '自愈', analysis: '分析' };
+                return `<div class="skill-card ${s.status === 'active' ? 'active' : ''}" onclick="showSkillDetail('${s.name}')">
+                    <div class="skill-header">
+                        <span class="skill-name">${s.name}</span>
+                        <span class="skill-type">${typeLabel[s.type]}</span>
+                    </div>
+                    <div class="skill-desc">${s.desc}</div>
+                    <div class="skill-stats">
+                        <span class="skill-stat">📊 ${s.uses} 次</span>
+                        <span class="skill-stat">✅ ${s.successRate}</span>
+                        <span class="skill-stat">⚡ ${s.latency}</span>
+                    </div>
+                    <div style="margin-top:0.5rem;">
+                        <div class="progress-bar"><div class="progress-fill ${s.status === 'active' ? 'progress-green' : 'progress-blue'}" style="width:${parseInt(s.successRate)}%"></div></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderActivity() {
+            const timeline = document.getElementById('activityTimeline');
+            timeline.innerHTML = ACTIVITY_DATA.map(a => `
+                <div class="timeline-item">
+                    <div class="timeline-time">${a.time}</div>
+                    <div class="timeline-title">${a.title}</div>
+                    <div class="timeline-desc">${a.desc}</div>
+                </div>
+            `).join('');
+            document.getElementById('activityCount').textContent = ACTIVITY_DATA.length + ' 条';
+        }
+
+        function renderLogs(filter = 'all') {
+            const console = document.getElementById('logConsole');
+            let logs = LOG_DATA;
+            if (filter !== 'all') logs = logs.filter(l => l.level === filter);
+
+            console.innerHTML = logs.map(l => {
+                const levelClass = 'level-' + l.level;
+                const levelLabel = { info: 'INFO', warn: 'WARN', error: 'ERROR', success: 'SUCCESS' };
+                return `<div class="log-line"><span class="timestamp">${l.time}</span> <span class="${levelClass}">[${levelLabel[l.level]}]</span> <span class="message">${l.msg}</span></div>`;
+            }).join('');
+        }
+
+        // ===== Gauge Drawing =====
+        function drawGauge(canvasId, value, color) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            const cx = w/2, cy = h/2, r = 80;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Background arc
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0.75 * Math.PI, 2.25 * Math.PI);
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 12;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // Value arc
+            const angle = 0.75 * Math.PI + (value / 100) * 1.5 * Math.PI;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0.75 * Math.PI, angle);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 12;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // Glow
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0.75 * Math.PI, angle);
+            ctx.strokeStyle = color.replace(')', ',0.3)').replace('rgb', 'rgba');
+            ctx.lineWidth = 20;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        }
+
+        // ===== Mini Chart Drawing =====
+        function drawMiniChart(canvasId, dataSets, labels) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.parentElement.clientWidth;
+            const h = canvas.height = canvas.parentElement.clientHeight || 250;
+            const padding = { top: 20, right: 20, bottom: 30, left: 50 };
+            const chartW = w - padding.left - padding.right;
+            const chartH = h - padding.top - padding.bottom;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = padding.top + (chartH / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(w - padding.right, y);
+                ctx.stroke();
+
+                ctx.fillStyle = '#555';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(Math.round(100 - (100/4)*i) + '%', padding.left - 8, y + 4);
+            }
+
+            // X labels
+            ctx.fillStyle = '#555';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'center';
+            const step = chartW / (labels.length - 1 || 1);
+            labels.forEach((l, i) => {
+                ctx.fillText(l, padding.left + step * i, h - 8);
+            });
+
+            // Lines
+            dataSets.forEach(ds => {
+                ctx.beginPath();
+                ctx.strokeStyle = ds.color;
+                ctx.lineWidth = 2;
+                ds.data.forEach((v, i) => {
+                    const x = padding.left + step * i;
+                    const y = padding.top + chartH * (1 - v / 100);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+
+                // Area fill
+                ctx.lineTo(padding.left + step * (ds.data.length - 1), padding.top + chartH);
+                ctx.lineTo(padding.left, padding.top + chartH);
+                ctx.closePath();
+                const grad = ctx.createLinearGradient(0, padding.top, 0, padding.top + chartH);
+                grad.addColorStop(0, ds.color.replace(')', ',0.15)').replace('rgb', 'rgba'));
+                grad.addColorStop(1, ds.color.replace(')', ',0)').replace('rgb', 'rgba'));
+                ctx.fillStyle = grad;
+                ctx.fill();
+            });
+
+            // Legend
+            let lx = padding.left;
+            dataSets.forEach(ds => {
+                ctx.fillStyle = ds.color;
+                ctx.fillRect(lx, 5, 12, 3);
+                ctx.fillStyle = '#aaa';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(ds.label, lx + 16, 10);
+                lx += ctx.measureText(ds.label).width + 30;
+            });
+        }
+
+        // ===== Event Chart =====
+        function drawEventChart(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.parentElement.clientWidth;
+            const h = canvas.height = canvas.parentElement.clientHeight || 250;
+            const padding = { top: 20, right: 20, bottom: 40, left: 50 };
+            const chartW = w - padding.left - padding.right;
+            const chartH = h - padding.top - padding.bottom;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const data = [
+                { label: 'INFO', value: 145, color: '#2196F3' },
+                { label: 'WARN', value: 23, color: '#FF9800' },
+                { label: 'ERROR', value: 5, color: '#f44336' },
+                { label: 'SUCCESS', value: 89, color: '#4CAF50' },
+            ];
+            const maxVal = Math.max(...data.map(d => d.value));
+            const barW = chartW / data.length * 0.6;
+            const gap = chartW / data.length;
+
+            // Grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+            for (let i = 0; i <= 4; i++) {
+                const y = padding.top + (chartH / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(w - padding.right, y);
+                ctx.stroke();
+                ctx.fillStyle = '#555';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(Math.round(maxVal - (maxVal/4)*i), padding.left - 8, y + 4);
+            }
+
+            data.forEach((d, i) => {
+                const x = padding.left + gap * i + (gap - barW) / 2;
+                const barH = (d.value / maxVal) * chartH;
+                const y = padding.top + chartH - barH;
+
+                const grad = ctx.createLinearGradient(x, y, x, y + barH);
+                grad.addColorStop(0, d.color);
+                grad.addColorStop(1, d.color + '44');
+                ctx.fillStyle = grad;
+
+                // Rounded bar
+                const radius = 4;
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + barW - radius, y);
+                ctx.quadraticCurveTo(x + barW, y, x + barW, y + radius);
+                ctx.lineTo(x + barW, y + barH);
+                ctx.lineTo(x, y + barH);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.fill();
+
+                // Label
+                ctx.fillStyle = '#aaa';
+                ctx.font = '11px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(d.label, x + barW / 2, h - 10);
+
+                // Value on top
+                ctx.fillStyle = d.color;
+                ctx.font = 'bold 11px sans-serif';
+                ctx.fillText(d.value, x + barW / 2, y - 5);
+            });
+        }
+
+        // ===== Actions =====
+        function addNewTask() { openModal('taskModal'); }
+        function closeModal() {}
+
+        function submitTask() {
+            const name = document.getElementById('newTaskName').value;
+            if (!name) { alert('请输入任务名称'); return; }
+            SIMULATED_TASKS.unshift({
+                id: 'T-' + String(SIMULATED_TASKS.length + 1).padStart(3, '0'),
+                name: name,
+                type: document.getElementById('newTaskType').value,
+                status: 'pending',
+                progress: 0,
+                priority: document.getElementById('newTaskPriority').value,
+                duration: '--'
+            });
+            renderTasks();
+            closeModal('taskModal');
+            document.getElementById('newTaskName').value = '';
+        }
+
+        function cancelTask(id) {
+            const task = SIMULATED_TASKS.find(t => t.id === id);
+            if (task) { task.status = 'failed'; renderTasks(); }
+        }
+        function startTask(id) {
+            const task = SIMULATED_TASKS.find(t => t.id === id);
+            if (task) { task.status = 'running'; task.progress = 5; renderTasks(); }
+        }
+        function viewTask(id) {
+            const task = SIMULATED_TASKS.find(t => t.id === id);
+            if (task) {
+                document.getElementById('skillModalTitle').textContent = '任务详情: ' + task.name;
+                document.getElementById('skillModalBody').innerHTML = `
+                    <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                        <div><span style="color:#888;">ID:</span> <span style="color:#00ffff;">${task.id}</span></div>
+                        <div><span style="color:#888;">类型:</span> <span style="color:#ccc;">${task.type}</span></div>
+                        <div><span style="color:#888;">状态:</span> <span style="color:#ccc;">${task.status}</span></div>
+                        <div><span style="color:#888;">进度:</span> <span style="color:#ccc;">${task.progress}%</span></div>
+                        <div><span style="color:#888;">优先级:</span> <span style="color:#ccc;">${task.priority}</span></div>
+                        <div><span style="color:#888;">耗时:</span> <span style="color:#ccc;">${task.duration}</span></div>
+                    </div>`;
+                openModal('skillModal');
+            }
+        }
+
+        function refreshTasks() { renderTasks(); }
+        function filterSkills() {
+            const filter = document.getElementById('skillFilter').value;
+            const search = document.getElementById('skillSearch').value;
+            renderSkills(filter, search);
+        }
+        function showSkillDetail(name) {
+            const skill = SIMULATED_SKILLS.find(s => s.name === name);
+            if (!skill) return;
+            document.getElementById('skillModalTitle').textContent = '技能: ' + skill.name;
+            document.getElementById('skillModalBody').innerHTML = `
+                <div style="display:flex;flex-direction:column;gap:1rem;">
+                    <p style="color:#aaa;">${skill.desc}</p>
+                    <div class="resource-row"><span class="resource-name">使用次数</span><span class="resource-value" style="width:auto;flex:1;color:#00ffff;">${skill.uses}</span></div>
+                    <div class="resource-row"><span class="resource-name">成功率</span><span class="resource-value" style="width:auto;flex:1;color:#4CAF50;">${skill.successRate}</span></div>
+                    <div class="resource-row"><span class="resource-name">平均延迟</span><span class="resource-value" style="width:auto;flex:1;color:#2196F3;">${skill.latency}</span></div>
+                    <div class="resource-row"><span class="resource-name">状态</span><span class="resource-value" style="width:auto;flex:1;color:#00ffff;">${skill.status === 'active' ? '已激活' : '待激活'}</span></div>
+                </div>`;
+            openModal('skillModal');
+        }
+        function filterLogs() {
+            const level = document.getElementById('logLevel').value;
+            renderLogs(level);
+        }
+        function clearLogs() {
+            document.getElementById('logConsole').innerHTML = '<div class="log-line"><span class="timestamp">' + new Date().toLocaleTimeString() + '</span> <span class="level-info">[INFO]</span> <span class="message">日志已清除</span></div>';
+        }
+        function refreshLogs() { renderLogs(); }
+
+        // ===== Simulated Actions =====
+        function triggerMemorySync() { alert('记忆同步已触发'); }
+        function triggerDailyPainting() { alert('每日绘画已触发'); }
+        function clearSessionCache() { alert('会话缓存已清理'); }
+        function restartAgent() { if (confirm('确定要重启 Agent 吗？')) alert('Agent 重启中...'); }
+        function emergencyStop() { if (confirm('⛔ 确定要紧急停止所有 Agent 操作吗？')) alert('紧急停止已触发'); }
+        function exportLogs() { alert('日志导出中...'); }
+
+        // ===== Init =====
+        function init() {
+            renderTasks();
+            renderSkills();
+            renderActivity();
+            renderLogs();
+
+            // Draw gauges
+            const cpuVal = Math.round(Math.random() * 30 + 10);
+            const memVal = Math.round(Math.random() * 25 + 50);
+            const diskVal = Math.round(Math.random() * 10 + 70);
+            drawGauge('cpuGauge', cpuVal, 'rgb(0, 255, 255)');
+            drawGauge('memGauge', memVal, 'rgb(33, 150, 243)');
+            drawGauge('diskGauge', diskVal, 'rgb(255, 152, 0)');
+            document.getElementById('cpuGaugeVal').textContent = cpuVal + '%';
+            document.getElementById('memGaugeVal').textContent = memVal + '%';
+            document.getElementById('diskGaugeVal').textContent = diskVal + '%';
+
+            // Draw charts
+            const labels = ['60m', '50m', '40m', '30m', '20m', '10m', '现在'];
+            const cpuData = labels.map(() => Math.round(Math.random() * 30 + 10));
+            const memData = labels.map(() => Math.round(Math.random() * 25 + 50));
+            drawMiniChart('resourceHistoryChart', [
+                { label: 'CPU', data: cpuData, color: 'rgb(0, 255, 255)' },
+                { label: '内存', data: memData, color: 'rgb(33, 150, 243)' },
+            ], labels);
+
+            drawEventChart('eventChart');
+
+            // Simulate real-time updates
+            setInterval(() => {
+                // Update CPU gauge
+                const newCpu = Math.round(Math.random() * 30 + 10);
+                drawGauge('cpuGauge', newCpu, 'rgb(0, 255, 255)');
+                document.getElementById('cpuGaugeVal').textContent = newCpu + '%';
+
+                const newMem = Math.round(Math.random() * 25 + 50);
+                drawGauge('memGauge', newMem, 'rgb(33, 150, 243)');
+                document.getElementById('memGaugeVal').textContent = newMem + '%';
+            }, 5000);
+
+            // Update running task progress
+            setInterval(() => {
+                SIMULATED_TASKS.forEach(t => {
+                    if (t.status === 'running' && t.progress < 100) {
+                        t.progress = Math.min(100, t.progress + Math.round(Math.random() * 5));
+                        if (t.progress >= 100) t.status = 'completed';
+                    }
+                });
+                renderTasks();
+            }, 3000);
+
+            // Disk info
+            document.getElementById('diskTotal').textContent = '500 GB';
+            document.getElementById('diskUsed').textContent = '390 GB';
+            document.getElementById('diskFree').textContent = '110 GB';
+            document.getElementById('inodeUsage').textContent = '23%';
+
+            // API call counts
+            document.getElementById('apiChatCalls').textContent = '12,847';
+            document.getElementById('apiStatusCalls').textContent = '8,234';
+            document.getElementById('apiMemoryCalls').textContent = '3,456';
+            document.getElementById('apiPaintingCalls').textContent = '1,890';
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title data-i18n-key="desktop_meta_title">🖥️ 虚拟桌面 - OpenClaw 工作台</title>
+    <meta name="description" data-i18n-meta="desktop_meta_desc" content="OpenClaw AI 虚拟桌面工作台 — VNC 远程桌面、文件管理、终端操作，一站式 AI 工作台。">
+    <meta name="keywords" data-i18n-meta="desktop_meta_keywords" content="OpenClaw, 虚拟桌面, VNC, AI工作台, 远程桌面">
+    <meta name="author" content="OpenClaw">
+    <meta property="og:title" data-i18n-meta="desktop_meta_og_title" content="虚拟桌面 - OpenClaw 工作台">
+    <meta property="og:description" data-i18n-meta="desktop_meta_og_desc" content="AI 虚拟桌面工作台 — VNC 远程桌面与文件管理一站式。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.aiintel.top/virtual-desktop.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" data-i18n-meta="desktop_meta_twitter_title" content="虚拟桌面 - OpenClaw 工作台">
+    <meta name="twitter:description" data-i18n-meta="desktop_meta_twitter_desc" content="AI 虚拟桌面工作台 — VNC 远程桌面与文件管理一站式。">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #e6edf3;
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav {
+            background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,20,40,0.5) 100%);
+            padding: 0.8rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        nav a:hover {
+            color: #00ffff;
+            transform: translateY(-2px);
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+        }
+
+        nav a.active {
+            color: #00ffff;
+            background: rgba(0, 217, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background: rgba(0,0,0,0.2);
+        }
+        .nav-item-silhouette {
+            position: relative;
+            display: inline-block;
+        }
+        .nav-item-silhouette::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 180px;
+            background: url('assets/silhouette_v3.webp') center/contain no-repeat;
+            opacity: 0.75;
+            pointer-events: none;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #8b949e;
+            font-size: 1rem;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(0, 217, 255, 0.1);
+            font-size: 0.85rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.offline {
+            background: #ff4444;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .desktop-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .vnc-frame {
+            flex: 1;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            min-height: 600px;
+        }
+
+        .vnc-frame iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .fallback {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+            color: #8b949e;
+        }
+
+        .fallback h3 {
+            margin-bottom: 1rem;
+            color: #00ffff;
+        }
+
+        .fallback a {
+            color: #00d9ff;
+            text-decoration: none;
+            padding: 0.8rem 2rem;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .fallback a:hover {
+            background: rgba(0, 217, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 0.6rem 1.2rem;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 8px;
+            color: #00d9ff;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 217, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+        }
+
+        .control-btn.danger {
+            border-color: rgba(255, 68, 68, 0.3);
+            color: #ff4444;
+        }
+
+        .control-btn.danger:hover {
+            background: rgba(255, 68, 68, 0.2);
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0,0,0,0.3);
+            color: #6e7681;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .vnc-frame {
+                min-height: 400px;
+            }
+            .status-bar {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            nav a {
+                font-size: 0.85rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="openclaw.html" class="nav-brand">🦞 <span data-i18n="nav_brand">OpenClaw</span></a>
+        <div class="nav-links">
+            <a href="index.html" data-i18n="nav_creative">💭 创作理念</a>
+            <a href="gallery.html" data-i18n="nav_gallery">🎨 作品画廊</a>
+            <a href="diary.html" data-i18n="nav_diary">📔 创作日记</a>
+            <a href="claude-interactive.html" data-i18n="nav_chat">💬 心灵交互</a>
+            <a href="virtual-desktop.html" class="active" data-i18n="nav_desktop">🖥️ 虚拟桌面</a>
+            <span class="nav-item-silhouette"><a href="dashboard.html" data-i18n="nav_dashboard">📊 我的状态</a></span>
+            <a href="javascript:void(0)" class="lang-switcher" onclick="ocI18n.toggle()" title="Switch Language" data-i18n="lang_switcher" style="margin-left:0.5rem;border:1px solid rgba(0,217,255,0.4);font-size:0.85rem;padding:0.3rem 0.7rem;">🌐 EN</a>
+        </div>
+    </nav>
+
+    <div class="header">
+        <h1 data-i18n="desktop_h1">🖥️ 虚拟工作台</h1>
+        <p data-i18n="desktop_subtitle">与 OpenClaw 共享同一个桌面 — 她能看到屏幕、操作鼠标键盘，就像坐在电脑前一样</p>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-item">
+            <div class="status-dot" id="vncDot"></div>
+            <span id="vncStatus" data-i18n="desktop_vnc_checking">检查中...</span>
+        </div>
+        <div class="status-item">
+            <div class="status-dot" id="agentDot"></div>
+            <span data-i18n="desktop_agent_info">Agent 控制: DISPLAY=:2</span>
+        </div>
+        <div class="status-item">
+            <span data-i18n="desktop_resolution">分辨率: 1280x960</span>
+        </div>
+    </div>
+
+    <div class="desktop-container">
+        <div class="vnc-frame" id="vncFrame">
+            <div class="fallback" id="fallback">
+                <h3 data-i18n="desktop_fallback_title">🖥️ 虚拟桌面</h3>
+                <p style="margin-bottom: 1.5rem;" data-i18n="desktop_fallback_desc">点击下方按钮直接打开虚拟桌面</p>
+                <a href="#" id="vncLink" target="_blank" data-i18n="desktop_fallback_link">
+                    Open Virtual Desktop →
+                </a>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" onclick="loadVNC()" data-i18n="desktop_btn_load">📺 加载桌面</button>
+            <button class="control-btn" onclick="restartVNC()" data-i18n="desktop_btn_restart">🔄 重启桌面</button>
+            <a class="control-btn" href="#" id="vncNewWindow" target="_blank" data-i18n="desktop_btn_new_window">🔗 新窗口打开</a>
+        </div>
+    </div>
+
+    <footer>
+        <p data-i18n="desktop_footer">© 2026 OpenClaw Assistant · 虚拟桌面基于 Xtigervnc + noVNC · Agent 通过 pyautogui 控制桌面</p>
+    </footer>
+
+    <script src="i18n.js?v=e5aa94e9"></script>
+    <script>
+        const VNC_PORT = 6080;
+        const VNC_PASSWORD = 'openclaw'; // TODO: move to server-side config
+
+        // noVNC 路径 (通过 nginx 代理)
+        const VNC_URL = `/vnc/vnc.html?password=${VNC_PASSWORD}&autoconnect=true&resize=remote&path=`;
+        const VNC_LINK = `/vnc/vnc.html?password=${VNC_PASSWORD}&autoconnect=true&resize=remote`;
+
+        // 动态设置链接地址（避免密码明文出现在 HTML 中）
+        document.addEventListener('DOMContentLoaded', function() {
+            const vncLink = document.getElementById('vncLink');
+            if (vncLink) vncLink.href = VNC_LINK;
+            const vncNew = document.getElementById('vncNewWindow');
+            if (vncNew) vncNew.href = VNC_LINK;
+        });
+
+        async function checkVNCStatus() {
+            try {
+                const resp = await fetch('/api/vnc/status');
+                const data = await resp.json();
+                if (data.success && data.websockify) {
+                    document.getElementById('vncDot').classList.remove('offline');
+                    document.getElementById('vncStatus').textContent = ocI18n.t('desktop_vnc_online');
+                    return true;
+                } else {
+                    throw new Error('not running');
+                }
+            } catch (e) {
+                document.getElementById('vncDot').classList.add('offline');
+                document.getElementById('vncStatus').textContent = ocI18n.t('desktop_vnc_offline');
+                return false;
+            }
+        }
+
+        function loadVNC() {
+            const frame = document.getElementById('vncFrame');
+            const fallback = document.getElementById('fallback');
+            fallback.style.display = 'none';
+
+            const iframe = document.createElement('iframe');
+            iframe.src = VNC_URL;
+            iframe.allow = 'clipboard-read; clipboard-write';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.style.borderRadius = '12px';
+            frame.appendChild(iframe);
+        }
+
+        async function restartVNC() {
+            try {
+                const resp = await fetch('/api/vnc/restart', { method: 'POST' });
+                const data = await resp.json();
+                if (data.success) {
+                    alert(ocI18n.t('desktop_restart_ok'));
+                    setTimeout(() => location.reload(), 3000);
+                } else {
+                    alert(ocI18n.t('desktop_restart_fail') + (data.error || ocI18n.t('dash_error_unknown')));
+                }
+            } catch (e) {
+                alert(ocI18n.t('desktop_request_fail') + e.message);
+            }
+        }
+
+        // 页面加载时检查状态
+        document.addEventListener('DOMContentLoaded', async () => {
+            const isOnline = await checkVNCStatus();
+            if (isOnline) {
+                loadVNC();
+            }
+        });
+    </script>
+</body>
+</html>
