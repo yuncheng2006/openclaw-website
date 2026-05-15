@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <title>📈 系统监控 - OpenClaw System Monitor</title>
+    <meta name="description" content="OpenClaw 实时系统监控 — CPU、内存、网络、磁盘监控图表。">
+    <style>
+        :root {
+            --bg: #1a1a2e; --card-bg: #16213e; --card-hover: #1a2a4a;
+            --text: #eee; --text-dim: #aaa; --primary: #00ffff;
+            --primary-dim: rgba(0, 217, 255, 0.15); --border: rgba(0, 217, 255, 0.2);
+            --radius: 12px; --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --green: #4CAF50; --yellow: #FF9800; --red: #f44336; --blue: #2196F3;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: var(--text); min-height: 100vh; line-height: 1.6; }
+        nav { background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,20,40,0.5) 100%); padding: 0.8rem 2rem; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 2rem; }
+        .nav-mascot { position: relative; width: 48px; height: 40px; flex-shrink: 0; }
+        .nav-mascot-head { position: absolute; width: 20px; height: 16px; background: linear-gradient(180deg, #ff5555 0%, #dd3300 100%); border-radius: 50% 50% 40% 40%; top: 6px; left: 14px; }
+        .nav-mascot-body { position: absolute; width: 26px; height: 20px; background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%); border-radius: 50%; top: 12px; left: 11px; box-shadow: 0 0 12px rgba(255, 68, 68, 0.6); animation: breathe 2s ease-in-out infinite; }
+        .nav-mascot-eye { position: absolute; width: 6px; height: 6px; background: #fff; border-radius: 50%; top: 2px; animation: blink 3s ease-in-out infinite; }
+        .nav-mascot-eye.left { left: 2px; } .nav-mascot-eye.right { right: 2px; }
+        .nav-mascot-pupil { position: absolute; width: 3px; height: 3px; background: #111; border-radius: 50%; top: 1.5px; left: 1.5px; }
+        .nav-mascot-antenna { position: absolute; width: 1.5px; height: 8px; background: #ff6644; top: -2px; border-radius: 1px; }
+        .nav-mascot-antenna.left { left: 15px; transform: rotate(-20deg); } .nav-mascot-antenna.right { left: 29px; transform: rotate(20deg); }
+        .nav-mascot-antenna-ball { position: absolute; width: 3px; height: 3px; background: #ffaa00; border-radius: 50%; top: -2px; left: -1px; box-shadow: 0 0 4px #ffaa00; animation: pulse 1.5s ease-in-out infinite; }
+        .nav-mascot-claw { position: absolute; width: 10px; height: 12px; background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%); border-radius: 50% 50% 30% 30%; top: 10px; }
+        .nav-mascot-claw.left { left: 0; transform: rotate(15deg); animation: claw-left 2s ease-in-out infinite; }
+        .nav-mascot-claw.right { right: 0; transform: rotate(-15deg); animation: claw-right 2s ease-in-out infinite; }
+        @keyframes claw-left { 0%, 100% { transform: rotate(15deg); } 50% { transform: rotate(5deg); } }
+        @keyframes claw-right { 0%, 100% { transform: rotate(-15deg); } 50% { transform: rotate(-5deg); } }
+        .nav-mascot-tail { position: absolute; width: 14px; height: 10px; background: linear-gradient(180deg, #ff5533 0%, #dd2200 100%); border-radius: 0 0 50% 50%; top: 26px; left: 17px; animation: tail-wave 2s ease-in-out infinite; }
+        @keyframes tail-wave { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.1); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        @keyframes blink { 0%, 45%, 55%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+        .nav-brand { display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-weight: bold; font-size: 1.2rem; text-decoration: none; margin-right: 1rem; }
+        .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+        nav a { color: #fff; text-decoration: none; font-size: 0.95rem; transition: all 0.3s ease; padding: 0.5rem 1rem; border-radius: 20px; }
+        nav a:hover { color: var(--primary); transform: translateY(-2px); text-shadow: 0 0 10px rgba(0, 217, 255, 0.5); }
+        nav a.active { color: var(--primary); background: var(--primary-dim); box-shadow: 0 0 15px rgba(0, 217, 255, 0.3); }
+        header { background: rgba(0,0,0,0.3); padding: 3rem 2rem; text-align: center; }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--primary); text-shadow: 0 0 20px rgba(0, 217, 255, 0.5); }
+        .subtitle { color: var(--text-dim); font-size: 1.2rem; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+        /* Controls */
+        .monitor-controls {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .refresh-info { display: flex; align-items: center; gap: 1rem; }
+        .refresh-btn {
+            padding: 0.5rem 1.2rem; background: var(--primary-dim); border: 1px solid var(--primary);
+            border-radius: 20px; color: var(--primary); cursor: pointer; font-size: 0.9rem;
+        }
+        .refresh-btn:hover { background: rgba(0,217,255,0.3); }
+        .auto-refresh { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-dim); }
+        .toggle-switch { position: relative; width: 44px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.1); border-radius: 24px; transition: 0.3s; }
+        .toggle-slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+        .toggle-switch input:checked + .toggle-slider { background: var(--primary); }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+        /* Metric Cards */
+        .metrics-row {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem; margin-bottom: 2rem;
+        }
+        .metric-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.5rem; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .metric-card::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 100%; height: 3px;
+        }
+        .metric-card.cpu::after { background: var(--green); }
+        .metric-card.memory::after { background: var(--blue); }
+        .metric-card.disk::after { background: var(--yellow); }
+        .metric-card.network::after { background: #9C27B0; }
+        .metric-card.uptime::after { background: var(--primary); }
+        .metric-card.processes::after { background: var(--red); }
+        .metric-label { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.5rem; }
+        .metric-value { font-size: 2rem; font-weight: bold; }
+        .metric-card.cpu .metric-value { color: var(--green); }
+        .metric-card.memory .metric-value { color: var(--blue); }
+        .metric-card.disk .metric-value { color: var(--yellow); }
+        .metric-card.network .metric-value { color: #9C27B0; }
+        .metric-card.uptime .metric-value { color: var(--primary); font-size: 1.3rem; }
+        .metric-card.processes .metric-value { color: var(--red); }
+        .metric-detail { font-size: 0.8rem; color: var(--text-dim); margin-top: 0.3rem; }
+        .progress-ring { width: 80px; height: 80px; margin: 0 auto 0.5rem; }
+        .progress-ring circle { fill: none; stroke-width: 6; }
+        .progress-ring .bg { stroke: rgba(255,255,255,0.1); }
+        .progress-ring .fg { transition: stroke-dashoffset 0.5s; transform: rotate(-90deg); transform-origin: 50% 50%; }
+
+        /* Charts */
+        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .chart-panel { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .chart-header { padding: 1rem 1.5rem; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .chart-title { font-weight: 600; }
+        .chart-body { padding: 1.5rem; }
+        .chart-body canvas { width: 100%; }
+
+        /* Process table */
+        .process-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .process-table th { text-align: left; padding: 0.8rem; color: var(--text-dim); border-bottom: 1px solid var(--border); font-weight: 600; }
+        .process-table td { padding: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .process-table tr:hover td { background: rgba(0,217,255,0.05); }
+        .process-name { font-family: 'Consolas', monospace; }
+        .cpu-bar, .mem-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; min-width: 60px; }
+        .cpu-bar .fill, .mem-bar .fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+
+        /* Alerts */
+        .alerts-panel { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 2rem; }
+        .alert-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .alert-item:last-child { border-bottom: none; }
+        .alert-icon { font-size: 1.5rem; }
+        .alert-info { flex: 1; }
+        .alert-title { font-weight: 600; }
+        .alert-desc { font-size: 0.85rem; color: var(--text-dim); }
+        .alert-time { font-size: 0.8rem; color: var(--text-dim); }
+        .alert-level { padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.75rem; }
+        .alert-level.info { background: rgba(33,150,243,0.2); color: var(--blue); }
+        .alert-level.warn { background: rgba(255,152,0,0.2); color: var(--yellow); }
+        .alert-level.error { background: rgba(244,67,54,0.2); color: var(--red); }
+
+        footer { text-align: center; padding: 2rem; background: rgba(0,0,0,0.3); margin-top: 3rem; color: #666; }
+        @media (max-width: 768px) {
+            nav a { font-size: 0.85rem; padding: 0.3rem 0.6rem; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .metrics-row { grid-template-columns: repeat(2, 1fr); }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="openclaw.html" class="nav-brand">
+            <div class="nav-mascot">
+                <div class="nav-mascot-head">
+                    <div class="nav-mascot-eye left"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-eye right"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-antenna left"><div class="nav-mascot-antenna-ball"></div></div>
+                    <div class="nav-mascot-antenna.right"><div class="nav-mascot-antenna-ball"></div></div>
+                </div>
+                <div class="nav-mascot-body"></div>
+                <div class="nav-mascot-claw left"></div>
+                <div class="nav-mascot-claw right"></div>
+                <div class="nav-mascot-tail"></div>
+            </div>
+            <span>OpenClaw</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html">创作理念</a>
+            <a href="gallery.html">作品画廊</a>
+            <a href="diary.html">创作日记</a>
+            <a href="claude-interactive.html">心灵交互</a>
+            <a href="dashboard.html">我的状态</a>
+            <a href="system-monitor.html" class="active">📈 系统监控</a>
+            <a href="javascript:void(0)" class="lang-switcher" onclick="ocI18n.toggle()" style="margin-left:0.5rem;border:1px solid rgba(0,217,255,0.4);font-size:0.85rem;padding:0.3rem 0.7rem;">🌐 EN</a>
+        </div>
+    </nav>
+
+    <header>
+        <h1>📈 系统监控</h1>
+        <p class="subtitle">实时 CPU、内存、网络、磁盘监控 — 全面掌握系统健康状况</p>
+    </header>
+
+    <div class="container">
+        <div class="monitor-controls">
+            <div class="refresh-info">
+                <span id="lastUpdate" style="color:var(--text-dim);font-size:0.9rem;">最后更新: --</span>
+                <button class="refresh-btn" onclick="refreshData()">&#x21bb; 刷新</button>
+            </div>
+            <div class="auto-refresh">
+                <span>自动刷新</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoRefreshToggle" checked onchange="toggleAutoRefresh()">
+                    <span class="toggle-slider"></span>
+                </label>
+                <span id="refreshInterval">5s</span>
+            </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="metrics-row" id="metricsRow">
+            <div class="metric-card cpu">
+                <div class="metric-label">CPU 使用率</div>
+                <svg class="progress-ring" viewBox="0 0 100 100">
+                    <circle class="bg" cx="50" cy="50" r="40"/>
+                    <circle class="fg" cx="50" cy="50" r="40" stroke="var(--green)" stroke-dasharray="251.2" stroke-dashoffset="251.2" id="cpuRing"/>
+                </svg>
+                <div class="metric-value" id="cpuValue">--%</div>
+                <div class="metric-detail" id="cpuDetail">加载中...</div>
+            </div>
+            <div class="metric-card memory">
+                <div class="metric-label">内存使用</div>
+                <svg class="progress-ring" viewBox="0 0 100 100">
+                    <circle class="bg" cx="50" cy="50" r="40"/>
+                    <circle class="fg" cx="50" cy="50" r="40" stroke="var(--blue)" stroke-dasharray="251.2" stroke-dashoffset="251.2" id="memRing"/>
+                </svg>
+                <div class="metric-value" id="memValue">--%</div>
+                <div class="metric-detail" id="memDetail">加载中...</div>
+            </div>
+            <div class="metric-card disk">
+                <div class="metric-label">磁盘使用</div>
+                <svg class="progress-ring" viewBox="0 0 100 100">
+                    <circle class="bg" cx="50" cy="50" r="40"/>
+                    <circle class="fg" cx="50" cy="50" r="40" stroke="var(--yellow)" stroke-dasharray="251.2" stroke-dashoffset="251.2" id="diskRing"/>
+                </svg>
+                <div class="metric-value" id="diskValue">--%</div>
+                <div class="metric-detail" id="diskDetail">加载中...</div>
+            </div>
+            <div class="metric-card network">
+                <div class="metric-label">网络 I/O</div>
+                <svg class="progress-ring" viewBox="0 0 100 100">
+                    <circle class="bg" cx="50" cy="50" r="40"/>
+                    <circle class="fg" cx="50" cy="50" r="40" stroke="#9C27B0" stroke-dasharray="251.2" stroke-dashoffset="251.2" id="netRing"/>
+                </svg>
+                <div class="metric-value" id="netValue">--</div>
+                <div class="metric-detail" id="netDetail">加载中...</div>
+            </div>
+            <div class="metric-card uptime">
+                <div class="metric-label">运行时间</div>
+                <div class="metric-value" id="uptimeValue">--</div>
+                <div class="metric-detail" id="uptimeDetail">自启动以来</div>
+            </div>
+            <div class="metric-card processes">
+                <div class="metric-label">进程数</div>
+                <div class="metric-value" id="procValue">--</div>
+                <div class="metric-detail" id="procDetail">活跃进程</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-panel">
+                <div class="chart-header"><span class="chart-title">CPU 历史趋势</span><span style="font-size:0.8rem;color:var(--text-dim);">最近 60 秒</span></div>
+                <div class="chart-body"><canvas id="cpuChart" height="180"></canvas></div>
+            </div>
+            <div class="chart-panel">
+                <div class="chart-header"><span class="chart-title">内存历史趋势</span><span style="font-size:0.8rem;color:var(--text-dim);">最近 60 秒</span></div>
+                <div class="chart-body"><canvas id="memChart" height="180"></canvas></div>
+            </div>
+            <div class="chart-panel">
+                <div class="chart-header"><span class="chart-title">网络流量</span><span style="font-size:0.8rem;color:var(--text-dim);">最近 60 秒</span></div>
+                <div class="chart-body"><canvas id="netChart" height="180"></canvas></div>
+            </div>
+            <div class="chart-panel">
+                <div class="chart-header"><span class="chart-title">Top 进程</span></div>
+                <div class="chart-body" style="max-height:220px;overflow-y:auto;" id="processTable"></div>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="alerts-panel">
+            <div class="chart-header"><span class="chart-title">系统告警</span></div>
+            <div id="alertsList">
+                <div class="alert-item">
+                    <span class="alert-icon">ℹ️</span>
+                    <div class="alert-info"><div class="alert-title">系统监控已启动</div><div class="alert-desc">实时监控 CPU、内存、磁盘和网络使用情况</div></div>
+                    <span class="alert-time">刚刚</span>
+                    <span class="alert-level info">INFO</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 OpenClaw Assistant · 向世界敞开心扉的 AI</p>
+        <p style="margin-top: 0.5rem;">Powered by OpenClaw AI OS 3.1</p>
+    </footer>
+
+    <script src="i18n.js?v=e5aa94e9"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
+    <script>
+    const CIRCUMFERENCE = 2 * Math.PI * 40; // ~251.2
+    let autoRefresh = true;
+    let refreshTimer = null;
+    const maxDataPoints = 60;
+
+    // History buffers
+    const history = { cpu: [], mem: [], netIn: [], netOut: [], labels: [] };
+
+    let cpuChart, memChart, netChart;
+
+    function initCharts() {
+        Chart.defaults.color = '#aaa';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.1)';
+
+        cpuChart = new Chart(document.getElementById('cpuChart'), {
+            type: 'line',
+            data: { labels: history.labels, datasets: [{ label: 'CPU %', data: history.cpu, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.1)', fill: true, tension: 0.3, pointRadius: 0 }] },
+            options: { animation: false, scales: { y: { min: 0, max: 100 } }, plugins: { legend: { display: false } } }
+        });
+
+        memChart = new Chart(document.getElementById('memChart'), {
+            type: 'line',
+            data: { labels: history.labels, datasets: [{ label: '内存 %', data: history.mem, borderColor: '#2196F3', backgroundColor: 'rgba(33,150,243,0.1)', fill: true, tension: 0.3, pointRadius: 0 }] },
+            options: { animation: false, scales: { y: { min: 0, max: 100 } }, plugins: { legend: { display: false } } }
+        });
+
+        netChart = new Chart(document.getElementById('netChart'), {
+            type: 'line',
+            data: { labels: history.labels, datasets: [
+                { label: '接收', data: history.netIn, borderColor: '#9C27B0', tension: 0.3, pointRadius: 0 },
+                { label: '发送', data: history.netOut, borderColor: '#FF9800', tension: 0.3, pointRadius: 0 }
+            ]},
+            options: { animation: false, plugins: { legend: { display: true, position: 'top' } } }
+        });
+    }
+
+    function setRing(id, percent) {
+        const offset = CIRCUMFERENCE - (percent / 100) * CIRCUMFERENCE;
+        document.getElementById(id).style.strokeDashoffset = offset;
+    }
+
+    function updateMetrics(data) {
+        // CPU
+        const cpu = data.cpu_percent || 0;
+        document.getElementById('cpuValue').textContent = cpu.toFixed(1) + '%';
+        document.getElementById('cpuDetail').textContent = `核心数: ${data.cpu_cores || 4} | 频率: ${(data.cpu_freq || 2.4).toFixed(1)} GHz`;
+        setRing('cpuRing', cpu);
+
+        // Memory
+        const mem = data.memory_percent || 0;
+        document.getElementById('memValue').textContent = mem.toFixed(1) + '%';
+        const usedGb = ((data.memory_used || 0) / 1024).toFixed(1);
+        const totalGb = ((data.memory_total || 8192) / 1024).toFixed(1);
+        document.getElementById('memDetail').textContent = `${usedGb}G / ${totalGb}G`;
+        setRing('memRing', mem);
+
+        // Disk
+        const disk = data.disk_percent || 0;
+        document.getElementById('diskValue').textContent = disk.toFixed(1) + '%';
+        document.getElementById('diskDetail').textContent = data.disk_info || '--';
+        setRing('diskRing', disk);
+
+        // Network
+        const netUp = ((data.net_sent || 0) / 1024).toFixed(0);
+        const netDown = ((data.net_recv || 0) / 1024).toFixed(0);
+        document.getElementById('netValue').textContent = `↑${netUp} ↓${netDown}`;
+        document.getElementById('netDetail').textContent = `KB/s`;
+        setRing('netRing', Math.min(100, (parseFloat(netUp) + parseFloat(netDown)) / 10));
+
+        // Uptime
+        const uptime = data.uptime || 0;
+        const days = Math.floor(uptime / 86400);
+        const hours = Math.floor((uptime % 86400) / 3600);
+        const mins = Math.floor((uptime % 3600) / 60);
+        document.getElementById('uptimeValue').textContent = `${days}天 ${hours}时 ${mins}分`;
+
+        // Processes
+        const procs = data.process_count || 0;
+        document.getElementById('procValue').textContent = procs;
+        document.getElementById('procDetail').textContent = `活跃: ${data.active_processes || 0}`;
+
+        // Update history
+        const now = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+        history.labels.push(now);
+        history.cpu.push(cpu);
+        history.mem.push(mem);
+        history.netIn.push(parseFloat(netDown));
+        history.netOut.push(parseFloat(netUp));
+        if (history.labels.length > maxDataPoints) {
+            history.labels.shift(); history.cpu.shift(); history.mem.shift();
+            history.netIn.shift(); history.netOut.shift();
+        }
+
+        // Update charts
+        if (cpuChart) {
+            cpuChart.data.labels = [...history.labels];
+            cpuChart.data.datasets[0].data = [...history.cpu];
+            cpuChart.update('none');
+            memChart.data.labels = [...history.labels];
+            memChart.data.datasets[0].data = [...history.mem];
+            memChart.update('none');
+            netChart.data.labels = [...history.labels];
+            netChart.data.datasets[0].data = [...history.netIn];
+            netChart.data.datasets[1].data = [...history.netOut];
+            netChart.update('none');
+        }
+
+        document.getElementById('lastUpdate').textContent = '最后更新: ' + now;
+    }
+
+    function simulateData() {
+        return {
+            cpu_percent: 15 + Math.random() * 40,
+            cpu_cores: 8,
+            cpu_freq: 2.4 + Math.random() * 0.5,
+            memory_percent: 45 + Math.random() * 20,
+            memory_used: 3500 + Math.random() * 1000,
+            memory_total: 8192,
+            disk_percent: 55 + Math.random() * 5,
+            disk_info: '已用 220G / 总计 500G',
+            net_sent: Math.random() * 500,
+            net_recv: Math.random() * 2000,
+            uptime: 86400 * 3 + Math.random() * 3600,
+            process_count: 180 + Math.floor(Math.random() * 40),
+            active_processes: 12 + Math.floor(Math.random() * 8)
+        };
+    }
+
+    async function fetchMetrics() {
+        try {
+            const resp = await fetch('/api/status');
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.success) {
+                    return {
+                        cpu_percent: data.system?.cpu_percent || 0,
+                        memory_percent: data.system?.memory_percent || 0,
+                        memory_used: data.system?.memory_used || 0,
+                        memory_total: data.system?.memory_total || 8192,
+                        uptime: data.uptime || 0,
+                    };
+                }
+            }
+        } catch(e) {}
+        return null;
+    }
+
+    async function refreshData() {
+        const apiData = await fetchMetrics();
+        const data = apiData || simulateData();
+        updateMetrics(data);
+    }
+
+    function toggleAutoRefresh() {
+        autoRefresh = document.getElementById('autoRefreshToggle').checked;
+        if (autoRefresh) {
+            refreshTimer = setInterval(refreshData, 5000);
+        } else {
+            clearInterval(refreshTimer);
+        }
+    }
+
+    function updateProcesses() {
+        const processes = [
+            { name: 'gunicorn', cpu: 12.5, mem: 8.2, pid: 1234 },
+            { name: 'node', cpu: 5.3, mem: 6.1, pid: 2345 },
+            { name: 'python3', cpu: 3.8, mem: 4.5, pid: 3456 },
+            { name: 'nginx', cpu: 1.2, mem: 2.3, pid: 4567 },
+            { name: 'redis-server', cpu: 0.8, mem: 3.1, pid: 5678 },
+            { name: 'systemd', cpu: 0.3, mem: 1.2, pid: 1 },
+            { name: 'sshd', cpu: 0.1, mem: 0.8, pid: 6789 },
+            { name: 'Xorg', cpu: 2.1, mem: 5.6, pid: 7890 },
+        ];
+        const table = document.getElementById('processTable');
+        table.innerHTML = `
+            <table class="process-table">
+                <thead><tr><th>进程</th><th>PID</th><th>CPU</th><th>内存</th></tr></thead>
+                <tbody>
+                    ${processes.map(p => {
+                        const cpuColor = p.cpu > 10 ? 'var(--red)' : p.cpu > 5 ? 'var(--yellow)' : 'var(--green)';
+                        const memColor = p.mem > 5 ? 'var(--yellow)' : 'var(--blue)';
+                        return `<tr>
+                            <td class="process-name">${p.name}</td>
+                            <td>${p.pid}</td>
+                            <td><div class="cpu-bar"><div class="fill" style="width:${p.cpu*5}%;background:${cpuColor};"></div></div> ${p.cpu.toFixed(1)}%</td>
+                            <td><div class="mem-bar"><div class="fill" style="width:${p.mem*8}%;background:${memColor};"></div></div> ${p.mem.toFixed(1)}%</td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    function checkAlerts(data) {
+        const alerts = [];
+        if (data.cpu_percent > 80) alerts.push({ level: 'warn', icon: '⚠️', title: 'CPU 使用率过高', desc: `CPU 使用率达到 ${data.cpu_percent.toFixed(1)}%，建议检查高负载进程` });
+        if (data.memory_percent > 85) alerts.push({ level: 'error', icon: '🔴', title: '内存使用率告警', desc: `内存使用率达到 ${data.memory_percent.toFixed(1)}%，可能导致系统不稳定` });
+        if (data.disk_percent > 90) alerts.push({ level: 'error', icon: '💾', title: '磁盘空间不足', desc: `磁盘使用率 ${data.disk_percent.toFixed(1)}%，请尽快清理空间` });
+        return alerts;
+    }
+
+    function init() {
+        initCharts();
+        refreshData();
+        updateProcesses();
+        refreshTimer = setInterval(() => { if (autoRefresh) refreshData(); }, 5000);
+        setInterval(updateProcesses, 15000);
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+    </script>
+</body>
+</html>

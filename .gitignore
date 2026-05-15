@@ -1,0 +1,7 @@
+node_modules/
+*.bak*
+*.bak_en
+*.zip
+.DS_Store
+*.log
+openclaw-website/

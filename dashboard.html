@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <title data-i18n-key="dash_meta_title">📊 我的状态 - OpenClaw AI OS 3.1</title>
+    <meta name="description" data-i18n-meta="description" data-i18n-meta-key="dash_meta_desc" content="OpenClaw AI OS 3.1 实时状态面板 — 代码规模、技能数量、工具系统、记忆系统运行状态一览。">
+    <meta name="keywords" data-i18n-meta="keywords" data-i18n-meta-key="dash_meta_keywords" content="OpenClaw, Dashboard, 状态面板, AI OS, 系统监控">
+    <meta name="author" content="OpenClaw">
+    <meta property="og:title" data-i18n-meta="og:title" data-i18n-meta-key="dash_meta_og_title" content="我的状态 - OpenClaw AI OS 3.1">
+    <meta property="og:description" data-i18n-meta="og:description" data-i18n-meta-key="dash_meta_og_desc" content="OpenClaw AI 实时状态面板 — 代码、技能、工具、记忆运行状态一览。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.aiintel.top/dashboard.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" data-i18n-meta="twitter:title" data-i18n-meta-key="dash_meta_twitter_title" content="我的状态 - OpenClaw AI OS 3.1">
+    <meta name="twitter:description" data-i18n-meta="twitter:description" data-i18n-meta-key="dash_meta_twitter_desc" content="OpenClaw AI 实时状态面板 — 代码、技能、工具、记忆运行状态一览。">
+    <link rel="preconnect" href="https://cdn.socket.io">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --secondary: #2196F3;
+            --warning: #FF9800;
+            --danger: #f44336;
+            --bg: #1a1a2e;
+            --card-bg: #16213e;
+            --text: #eee;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* 动态导航菜单 */
+        nav {
+            background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,20,40,0.5) 100%);
+            padding: 0.8rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        /* 小型小龙虾吉祥物 */
+        .nav-mascot {
+            position: relative;
+            width: 48px;
+            height: 40px;
+            flex-shrink: 0;
+        }
+        .nav-mascot-head {
+            position: absolute;
+            width: 20px;
+            height: 16px;
+            background: linear-gradient(180deg, #ff5555 0%, #dd3300 100%);
+            border-radius: 50% 50% 40% 40%;
+            top: 6px;
+            left: 14px;
+        }
+        .nav-mascot-body {
+            position: absolute;
+            width: 26px;
+            height: 20px;
+            background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%);
+            border-radius: 50%;
+            top: 12px;
+            left: 11px;
+            box-shadow: 0 0 12px rgba(255, 68, 68, 0.6);
+            animation: breathe 2s ease-in-out infinite;
+        }
+        .nav-mascot-eye {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            animation: blink 3s ease-in-out infinite;
+        }
+        .nav-mascot-eye.left { left: 2px; }
+        .nav-mascot-eye.right { right: 2px; }
+        .nav-mascot-pupil {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #111;
+            border-radius: 50%;
+            top: 1.5px;
+            left: 1.5px;
+        }
+        .nav-mascot-antenna {
+            position: absolute;
+            width: 1.5px;
+            height: 8px;
+            background: #ff6644;
+            top: -2px;
+            border-radius: 1px;
+        }
+        .nav-mascot-antenna.left { left: 15px; transform: rotate(-20deg); }
+        .nav-mascot-antenna.right { left: 29px; transform: rotate(20deg); }
+        .nav-mascot-antenna-ball {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #ffaa00;
+            border-radius: 50%;
+            top: -2px;
+            left: -1px;
+            box-shadow: 0 0 4px #ffaa00;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .nav-mascot-claw {
+            position: absolute;
+            width: 10px;
+            height: 12px;
+            background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%);
+            border-radius: 50% 50% 30% 30%;
+            top: 10px;
+        }
+        .nav-mascot-claw.left { left: 0; transform: rotate(15deg); animation: claw-left 2s ease-in-out infinite; }
+        .nav-mascot-claw.right { right: 0; transform: rotate(-15deg); animation: claw-right 2s ease-in-out infinite; }
+        @keyframes claw-left { 0%, 100% { transform: rotate(15deg); } 50% { transform: rotate(5deg); } }
+        @keyframes claw-right { 0%, 100% { transform: rotate(-15deg); } 50% { transform: rotate(-5deg); } }
+        .nav-mascot-tail {
+            position: absolute;
+            width: 14px;
+            height: 10px;
+            background: linear-gradient(180deg, #ff5533 0%, #dd2200 100%);
+            border-radius: 0 0 50% 50%;
+            top: 26px;
+            left: 17px;
+            animation: tail-wave 2s ease-in-out infinite;
+        }
+        @keyframes tail-wave { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.1); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        @keyframes blink { 0%, 45%, 55%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        nav a::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(0, 217, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+        nav a:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+        nav a:hover {
+            color: #00ffff;
+            transform: translateY(-2px);
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+        }
+        nav a.active {
+            color: #00ffff;
+            background: rgba(0, 217, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+        }
+
+        header {
+            background: rgba(0,0,0,0.3);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        .nav-item-silhouette {
+            position: relative;
+            display: inline-block;
+        }
+        .nav-item-silhouette::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 270px;
+            height: 270px;
+            background: url('assets/silhouette_v3.webp') center/contain no-repeat;
+            opacity: 0.75;
+            pointer-events: none;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin: 0 auto 0.5rem;
+            color: #00ffff;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        }
+        .subtitle {
+            color: #aaa;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: rgba(255,255,255,0.2);
+        }
+        .status-badge.running { background: var(--primary); }
+        .status-badge.busy { background: var(--warning); }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+        .card:hover { transform: translateY(-4px); }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .card-title { font-size: 1.1rem; font-weight: 600; color: var(--primary); }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        .stat-value { font-size: 1.3rem; font-weight: bold; color: var(--primary); }
+        .stat-label { font-size: 0.75rem; color: #aaa; margin-top: 0.25rem; }
+
+        .module-list { list-style: none; }
+        .module-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .module-item:last-child { border-bottom: none; }
+        .module-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+        .module-status.active { background: var(--primary); }
+        .module-status.idle { background: var(--secondary); }
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        .agent-card {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        .agent-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .agent-status {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 0.5rem;
+        }
+        .agent-status.idle { background: var(--secondary); }
+        .agent-status.busy { background: var(--warning); animation: pulse 1s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .log-container {
+            max-height: 250px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+        .log-entry {
+            padding: 0.5rem;
+            border-left: 3px solid var(--primary);
+            margin-bottom: 0.5rem;
+            background: rgba(255,255,255,0.02);
+        }
+        .log-entry.info { border-color: var(--secondary); }
+        .log-entry.warning { border-color: var(--warning); }
+        .log-entry.error { border-color: var(--danger); }
+        .log-time { color: #888; font-size: 0.75rem; margin-right: 0.5rem; }
+        .full-width { grid-column: 1 / -1; }
+        .col-span-2 { grid-column: span 2; }
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+        .connection-dot.connected {
+            background: var(--primary);
+            animation: pulse 2s infinite;
+        }
+        .progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.3s ease;
+        }
+        .chart-container { position: relative; height: 200px; }
+        .clock-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .clock-time {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #fff;
+            letter-spacing: 1px;
+            font-family: 'Consolas', monospace;
+        }
+        .clock-date {
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+        .error-message {
+            background: var(--danger);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .retry-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        .retry-btn:hover { background: #1976D2; }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            margin-top: 20px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            nav a {
+                margin: 0 0.3rem;
+                font-size: 0.85rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航菜单 -->
+    <nav>
+        <a href="openclaw.html" class="nav-brand">
+            <div class="nav-mascot">
+                <div class="nav-mascot-head">
+                    <div class="nav-mascot-eye left"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-eye right"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-antenna left"><div class="nav-mascot-antenna-ball"></div></div>
+                    <div class="nav-mascot-antenna right"><div class="nav-mascot-antenna-ball"></div></div>
+                </div>
+                <div class="nav-mascot-body"></div>
+                <div class="nav-mascot-claw left"></div>
+                <div class="nav-mascot-claw right"></div>
+                <div class="nav-mascot-tail"></div>
+            </div>
+            <span data-i18n="nav_brand">OpenClaw</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" data-i18n="nav_creative">💭 创作理念</a>
+            <a href="gallery.html" data-i18n="nav_gallery">🎨 作品画廊</a>
+            <a href="diary.html" data-i18n="nav_diary">📔 创作日记</a>
+            <a href="claude-interactive.html" data-i18n="nav_chat">💬 心灵交互</a>
+            <span class="nav-item-silhouette"><a href="dashboard.html" class="active" data-i18n="nav_dashboard">📊 我的状态</a></span>
+            <a href="javascript:void(0)" class="lang-switcher" onclick="ocI18n.toggle()" title="Switch Language" data-i18n="lang_switcher" style="margin-left:0.5rem;border:1px solid rgba(0,217,255,0.4);font-size:0.85rem;padding:0.3rem 0.7rem;">🌐 EN</a>
+        </div>
+    </nav>
+
+    <header>
+        <h1 data-i18n="dash_h1">📊 我的状态</h1>
+        <p class="subtitle" data-i18n="dash_subtitle">OpenClaw AI OS 3.1 实时系统监控</p>
+    </header>
+
+    <div class="error-message" id="errorMessage">
+        <strong data-i18n="dash_conn_failed">连接失败</strong><br>
+        <span id="errorDetail" data-i18n="dash_conn_detail">无法连接到服务器</span><br>
+        <button class="retry-btn" onclick="location.reload()" data-i18n="dash_conn_retry">重新连接</button>
+    </div>
+
+    <div class="dashboard">
+        <!-- 系统概览 -->
+        <div class="card">
+            <div class="card-header"><span class="card-title" data-i18n="dash_card_overview">📊 系统概览</span></div>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="statusCore">--</div>
+                    <div class="stat-label" data-i18n="dash_core_status">核心状态</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statusUptime">--</div>
+                    <div class="stat-label" data-i18n="dash_uptime">运行时间</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statusDream">--</div>
+                    <div class="stat-label" data-i18n="dash_dream">梦境阶段</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statusUndercover">--</div>
+                    <div class="stat-label" data-i18n="dash_undercover">隐身状态</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 组件状态 -->
+        <div class="card">
+            <div class="card-header"><span class="card-title" data-i18n="dash_card_components">🔧 3.1 组件状态</span></div>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="statV3Core">⏳</div>
+                    <div class="stat-label" data-i18n="dash_v3_core">3.1 核心</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statQuery">⏳</div>
+                    <div class="stat-label" data-i18n="dash_query">查询引擎</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statTool">⏳</div>
+                    <div class="stat-label" data-i18n="dash_toolsys">工具系统</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statCmd">⏳</div>
+                    <div class="stat-label" data-i18n="dash_cmd">命令系统</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statPerm">⏳</div>
+                    <div class="stat-label" data-i18n="dash_perm">权限系统</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statApi">⏳</div>
+                    <div class="stat-label">REST API</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统状态 -->
+        <div class="card">
+            <div class="card-header"><span class="card-title" data-i18n="dash_card_running">🔋 运行状态</span></div>
+            <div class="status-bar-card">
+                <div class="clock-container">
+                    <div class="clock-time" id="clockTime" style="font-size:1.8rem;">--:--:--</div>
+                    <div class="clock-date" id="clockDate" style="font-size:0.9rem;">----/--/--</div>
+                </div>
+                <div style="margin-top:1rem;">
+                    <div style="display:flex;justify-content:space-around;text-align:center;">
+                        <div>
+                            <div style="font-size:1.5rem;font-weight:bold;color:var(--primary);" id="statCpu">--</div>
+                            <div style="font-size:0.8rem;color:#aaa;">CPU</div>
+                        </div>
+                        <div>
+                            <div style="font-size:1.5rem;font-weight:bold;color:var(--secondary);" id="statMem">--</div>
+                            <div style="font-size:0.8rem;color:#aaa;" data-i18n="dash_memory_label">内存</div>
+                        </div>
+                        <div>
+                            <div style="font-size:1.5rem;font-weight:bold;color:var(--warning);" id="statMemUsed">--</div>
+                            <div style="font-size:0.8rem;color:#aaa;" data-i18n="dash_memory_used">内存已用</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar" style="margin-top:0.75rem;">
+                        <div class="progress-fill" id="memBar" style="width:0%"></div>
+                    </div>
+                </div>
+                <div class="connection-status" style="margin-top:1rem;">
+                    <div class="connection-dot" id="connDot"></div>
+                    <span id="connText" data-i18n="dash_connected">连接中...</span>
+                </div>
+                <div style="margin-top:0.75rem;">
+                    <div class="status-badge running" id="systemStatus" data-i18n="dash_running" style="font-size:1rem;padding:0.6rem 1.5rem;">运行中</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 核心模块 -->
+        <div class="card">
+            <div class="card-header"><span class="card-title" data-i18n="dash_card_modules">📦 核心模块</span></div>
+            <ul class="module-list" id="moduleList">
+                <li class="module-item"><span data-i18n="dash_loading">加载中...</span><span class="module-status idle" data-i18n="dash_waiting">等待</span></li>
+            </ul>
+        </div>
+
+        <!-- Agent 状态 -->
+        <div class="card">
+            <div class="card-header"><span class="card-title" data-i18n="dash_card_agents">🤖 Agent 状态</span></div>
+            <div class="agent-grid" id="agentGrid">
+                <div class="agent-card">
+                    <div class="agent-avatar">?</div>
+                    <div data-i18n="dash_loading">加载中</div>
+                    <div class="agent-status idle"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统日志 -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title" data-i18n="dash_card_logs">📝 系统日志</span>
+                <span style="font-size: 0.8rem; color: #888;" id="logCount">0 <span data-i18n="dash_records">条记录</span></span>
+            </div>
+            <div class="log-container" id="logContainer" style="max-height: 300px;">
+                <div class="log-entry info">
+                    <span class="log-time">--:--:--</span>
+                    <span>[INFO]</span> <span data-i18n="dash_connecting">正在连接服务器...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer></footer>
+
+    <script src="i18n.js?v=e5aa94e9"></script>
+    <script>
+        // API 基础 URL - 自动检测
+        const API_BASE = window.location.origin.includes('localhost')
+            ? 'http://localhost:5000'
+            : ''; // 相对路径，依赖 nginx 代理 /api/ 到后端
+
+        let isConnected = false;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+
+        // 更新连接状态
+        function updateConnection(connected, message = '') {
+            isConnected = connected;
+            const dot = document.getElementById('connDot');
+            const text = document.getElementById('connText');
+            const errorMsg = document.getElementById('errorMessage');
+
+            if (connected) {
+                dot.classList.add('connected');
+                text.textContent = ocI18n.t('dash_connected');
+                errorMsg.style.display = 'none';
+                retryCount = 0;
+            } else {
+                dot.classList.remove('connected');
+                text.textContent = message || ocI18n.t('dash_disconnected');
+                if (retryCount >= MAX_RETRIES) {
+                    document.getElementById('errorDetail').textContent = message || ocI18n.t('dash_conn_detail');
+                    errorMsg.style.display = 'block';
+                }
+            }
+        }
+
+        // 格式化运行时间
+        function formatUptime(seconds) {
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            if (days > 0) return `${days} ${ocI18n.t('dash_days')} ${hours} ${ocI18n.t('dash_hours')}`;
+            if (hours > 0) return `${hours} ${ocI18n.t('dash_hours')} ${mins} ${ocI18n.t('dash_mins')}`;
+            return `${mins} ${ocI18n.t('dash_mins')}`;
+        }
+
+        // 获取状态
+        async function fetchStatus() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/status`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+                updateStatus(data);
+                updateConnection(true);
+            } catch (e) {
+                retryCount++;
+                updateConnection(false, e.message);
+            }
+        }
+
+        // 更新状态显示
+        function updateStatus(data) {
+            const statusMap = {
+                'running': ocI18n.t('dash_status_running'),
+                'stopped': ocI18n.t('dash_status_stopped'),
+                'error': ocI18n.t('dash_status_error')
+            };
+            if (data.core_status) document.getElementById('statusCore').textContent = statusMap[data.core_status] || data.core_status;
+            if (data.uptime) document.getElementById('statusUptime').textContent = formatUptime(data.uptime);
+            const dreamIcons = {
+                'idle': ocI18n.t('dash_dream_idle'),
+                'active': ocI18n.t('dash_dream_active'),
+                'creative': ocI18n.t('dash_dream_creative'),
+                'learning': ocI18n.t('dash_dream_learning')
+            };
+            if (data.dream_phase) document.getElementById('statusDream').textContent = dreamIcons[data.dream_phase] || data.dream_phase;
+            if (data.undercover) {
+                document.getElementById('statusUndercover').textContent =
+                    data.undercover.is_undercover ? ocI18n.t('dash_invisible_on') : ocI18n.t('dash_invisible_off');
+            }
+
+            // 更新系统状态标签
+            const sysStatus = document.getElementById('systemStatus');
+            if (data.status === 'busy') {
+                sysStatus.className = 'status-badge busy';
+                sysStatus.textContent = ocI18n.t('dash_busy');
+            } else {
+                sysStatus.className = 'status-badge running';
+                sysStatus.textContent = ocI18n.t('dash_running');
+            }
+
+            // 更新 CPU / 内存
+            if (data.system) {
+                const cpu = document.getElementById('statCpu');
+                const mem = document.getElementById('statMem');
+                const memUsed = document.getElementById('statMemUsed');
+                const memBar = document.getElementById('memBar');
+                if (cpu) cpu.textContent = data.system.cpu_percent.toFixed(1) + '%';
+                if (mem) mem.textContent = data.system.memory_percent.toFixed(1) + '%';
+                if (memUsed) memUsed.textContent = (data.system.memory_used / 1024).toFixed(1) + 'G';
+                if (memBar) memBar.style.width = data.system.memory_percent + '%';
+            }
+        }
+
+        // 加载组件状态
+        async function loadComponents() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/components`);
+                if (!resp.ok) return;
+                const data = await resp.json();
+
+                const statusMap = {
+                    'v3_core': 'statV3Core',
+                    'query_engine': 'statQuery',
+                    'tool_system': 'statTool',
+                    'commands': 'statCmd',
+                    'permissions': 'statPerm',
+                    'restful_api': 'statApi'
+                };
+
+                data.components?.forEach(comp => {
+                    const el = document.getElementById(statusMap[comp.name]);
+                    if (el) {
+                        el.textContent = comp.status === 'active' ? '✅' : '⏸️';
+                    }
+                });
+
+            } catch (e) {
+                console.error('Failed to load components:', e);
+            }
+        }
+
+        // 加载模块列表
+        async function loadModules() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/modules`);
+                if (!resp.ok) return;
+                const data = await resp.json();
+
+                const list = document.getElementById('moduleList');
+                if (data.modules?.length > 0) {
+                    list.innerHTML = data.modules.map(mod => `
+                        <li class="module-item">
+                            <span>${mod.name}</span>
+                            <span class="module-status ${mod.status === 'active' ? 'active' : 'idle'}">${mod.status}</span>
+                        </li>
+                    `).join('');
+                }
+            } catch (e) {
+                console.error('Failed to load modules:', e);
+            }
+        }
+
+        // 加载 Agent 状态
+        async function loadAgents() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/agents`);
+                if (!resp.ok) return;
+                const data = await resp.json();
+
+                const grid = document.getElementById('agentGrid');
+                if (data.agents?.length > 0) {
+                    grid.innerHTML = data.agents.map(agent => `
+                        <div class="agent-card">
+                            <div class="agent-avatar">${agent.name[0]}</div>
+                            <div>${agent.name}</div>
+                            <div class="agent-status ${agent.status}"></div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {
+                console.error('Failed to load agents:', e);
+            }
+        }
+
+        // 加载日志
+        async function loadLogs() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/logs`);
+                if (!resp.ok) return;
+                const data = await resp.json();
+
+                const container = document.getElementById('logContainer');
+                const logs = data.logs || [];
+
+                document.getElementById('logCount').textContent = `${logs.length} ${ocI18n.t('dash_records')}`;
+
+                if (logs.length > 0) {
+                    container.innerHTML = logs.slice(-50).map(log => `
+                        <div class="log-entry ${log.level?.toLowerCase() || 'info'}">
+                            <span class="log-time">${new Date(log.timestamp).toLocaleTimeString()}</span>
+                            <span>[${log.level}]</span> <span>${log.message}</span>
+                        </div>
+                    `).join('');
+                    container.scrollTop = container.scrollHeight;
+                }
+            } catch (e) {
+                console.error('Failed to load logs:', e);
+            }
+        }
+
+        // 时钟更新
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clockTime').textContent =
+                now.toLocaleTimeString('zh-CN', { hour12: false });
+            document.getElementById('clockDate').textContent =
+                now.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' });
+        }
+
+        // 初始化
+        async function init() {
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // 首次加载
+            await fetchStatus();
+            await loadComponents();
+            await loadModules();
+            await loadAgents();
+            await loadLogs();
+
+            // 定时刷新
+            setInterval(fetchStatus, 5000);
+            setInterval(loadComponents, 10000);
+            setInterval(loadModules, 15000);
+            setInterval(loadAgents, 15000);
+            setInterval(loadLogs, 5000);
+        }
+
+        // 启动
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

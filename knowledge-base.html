@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <title>📚 知识库 - OpenClaw Knowledge Base</title>
+    <meta name="description" content="OpenClaw 知识库 — 全文搜索、分类浏览、标签云、智能问答。">
+    <style>
+        :root {
+            --bg: #1a1a2e; --card-bg: #16213e; --card-hover: #1a2a4a;
+            --text: #eee; --text-dim: #aaa; --primary: #00ffff;
+            --primary-dim: rgba(0, 217, 255, 0.15); --border: rgba(0, 217, 255, 0.2);
+            --radius: 12px; --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --accent: #ff6b6b; --accent2: #4CAF50; --accent3: #FF9800;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: var(--text); min-height: 100vh; line-height: 1.6; }
+        nav { background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,20,40,0.5) 100%); padding: 0.8rem 2rem; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 2rem; }
+        .nav-mascot { position: relative; width: 48px; height: 40px; flex-shrink: 0; }
+        .nav-mascot-head { position: absolute; width: 20px; height: 16px; background: linear-gradient(180deg, #ff5555 0%, #dd3300 100%); border-radius: 50% 50% 40% 40%; top: 6px; left: 14px; }
+        .nav-mascot-body { position: absolute; width: 26px; height: 20px; background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%); border-radius: 50%; top: 12px; left: 11px; box-shadow: 0 0 12px rgba(255, 68, 68, 0.6); animation: breathe 2s ease-in-out infinite; }
+        .nav-mascot-eye { position: absolute; width: 6px; height: 6px; background: #fff; border-radius: 50%; top: 2px; animation: blink 3s ease-in-out infinite; }
+        .nav-mascot-eye.left { left: 2px; } .nav-mascot-eye.right { right: 2px; }
+        .nav-mascot-pupil { position: absolute; width: 3px; height: 3px; background: #111; border-radius: 50%; top: 1.5px; left: 1.5px; }
+        .nav-mascot-antenna { position: absolute; width: 1.5px; height: 8px; background: #ff6644; top: -2px; border-radius: 1px; }
+        .nav-mascot-antenna.left { left: 15px; transform: rotate(-20deg); } .nav-mascot-antenna.right { left: 29px; transform: rotate(20deg); }
+        .nav-mascot-antenna-ball { position: absolute; width: 3px; height: 3px; background: #ffaa00; border-radius: 50%; top: -2px; left: -1px; box-shadow: 0 0 4px #ffaa00; animation: pulse 1.5s ease-in-out infinite; }
+        .nav-mascot-claw { position: absolute; width: 10px; height: 12px; background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%); border-radius: 50% 50% 30% 30%; top: 10px; }
+        .nav-mascot-claw.left { left: 0; transform: rotate(15deg); animation: claw-left 2s ease-in-out infinite; }
+        .nav-mascot-claw.right { right: 0; transform: rotate(-15deg); animation: claw-right 2s ease-in-out infinite; }
+        @keyframes claw-left { 0%, 100% { transform: rotate(15deg); } 50% { transform: rotate(5deg); } }
+        @keyframes claw-right { 0%, 100% { transform: rotate(-15deg); } 50% { transform: rotate(-5deg); } }
+        .nav-mascot-tail { position: absolute; width: 14px; height: 10px; background: linear-gradient(180deg, #ff5533 0%, #dd2200 100%); border-radius: 0 0 50% 50%; top: 26px; left: 17px; animation: tail-wave 2s ease-in-out infinite; }
+        @keyframes tail-wave { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.1); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        @keyframes blink { 0%, 45%, 55%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+        .nav-brand { display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-weight: bold; font-size: 1.2rem; text-decoration: none; margin-right: 1rem; }
+        .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+        nav a { color: #fff; text-decoration: none; font-size: 0.95rem; transition: all 0.3s ease; padding: 0.5rem 1rem; border-radius: 20px; }
+        nav a:hover { color: var(--primary); transform: translateY(-2px); text-shadow: 0 0 10px rgba(0, 217, 255, 0.5); }
+        nav a.active { color: var(--primary); background: var(--primary-dim); box-shadow: 0 0 15px rgba(0, 217, 255, 0.3); }
+        header { background: rgba(0,0,0,0.3); padding: 3rem 2rem; text-align: center; }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--primary); text-shadow: 0 0 20px rgba(0, 217, 255, 0.5); }
+        .subtitle { color: var(--text-dim); font-size: 1.2rem; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        /* Search */
+        .search-hero {
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            text-align: center;
+        }
+        .search-input-wrap {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        .search-input-wrap input {
+            width: 100%;
+            padding: 1.2rem 1.5rem 1.2rem 3rem;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 30px;
+            color: var(--text);
+            font-size: 1.1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-input-wrap input:focus { border-color: var(--primary); }
+        .search-input-wrap .icon { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-dim); }
+        .search-stats { font-size: 0.85rem; color: var(--text-dim); }
+
+        /* Sidebar + Content layout */
+        .kb-layout { display: grid; grid-template-columns: 250px 1fr; gap: 2rem; }
+        .sidebar {
+            position: sticky; top: 100px; height: fit-content;
+        }
+        .sidebar-section { margin-bottom: 1.5rem; }
+        .sidebar-title { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .cat-list { list-style: none; }
+        .cat-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.6rem 1rem; border-radius: 8px; cursor: pointer;
+            transition: all 0.3s; color: var(--text-dim); font-size: 0.9rem;
+        }
+        .cat-item:hover, .cat-item.active { background: var(--primary-dim); color: var(--primary); }
+        .cat-count { background: rgba(255,255,255,0.1); padding: 0.1rem 0.5rem; border-radius: 10px; font-size: 0.75rem; }
+
+        /* Tag cloud */
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+        .tag-cloud .tag {
+            padding: 0.3rem 0.7rem; border-radius: 12px;
+            background: rgba(255,255,255,0.05); color: var(--text-dim);
+            cursor: pointer; transition: all 0.3s; font-size: 0.8rem;
+        }
+        .tag-cloud .tag:hover { background: var(--primary-dim); color: var(--primary); }
+        .tag-cloud .tag.size-lg { font-size: 1rem; padding: 0.4rem 0.8rem; }
+        .tag-cloud .tag.size-md { font-size: 0.9rem; }
+
+        /* Article list */
+        .article-list { display: flex; flex-direction: column; gap: 1rem; }
+        .article-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .article-card:hover { border-color: var(--primary); transform: translateX(4px); }
+        .article-meta { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; font-size: 0.8rem; color: var(--text-dim); }
+        .article-category { padding: 0.2rem 0.6rem; border-radius: 10px; background: var(--primary-dim); color: var(--primary); }
+        .article-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text); }
+        .article-excerpt { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.8rem; }
+        .article-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .article-tags .tag { padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 0.75rem; color: var(--text-dim); }
+
+        /* Article view modal */
+        .article-modal {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.7); z-index: 1000;
+            justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .article-modal.active { display: flex; }
+        .article-content {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 16px; max-width: 800px; width: 90%; max-height: 85vh;
+            overflow-y: auto; padding: 2.5rem; position: relative;
+        }
+        .article-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-dim); font-size: 1.5rem; cursor: pointer; }
+        .article-body { line-height: 1.8; }
+        .article-body h2 { color: var(--primary); margin: 1.5rem 0 1rem; }
+        .article-body p { margin-bottom: 1rem; color: var(--text-dim); }
+        .article-body code { background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px; font-family: 'Consolas', monospace; }
+        .article-body pre { background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; overflow-x: auto; margin: 1rem 0; }
+        .article-body pre code { background: none; padding: 0; }
+        .article-body ul { padding-left: 1.5rem; margin-bottom: 1rem; }
+        .article-body li { color: var(--text-dim); margin-bottom: 0.3rem; }
+
+        /* Q&A */
+        .qa-section { margin-top: 2rem; }
+        .qa-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 0.5rem; }
+        .qa-question {
+            padding: 1rem 1.5rem; cursor: pointer; display: flex;
+            justify-content: space-between; align-items: center; font-weight: 600;
+        }
+        .qa-question:hover { background: rgba(0,217,255,0.05); }
+        .qa-answer { padding: 0 1.5rem; max-height: 0; overflow: hidden; transition: all 0.3s; color: var(--text-dim); }
+        .qa-item.open .qa-answer { max-height: 500px; padding: 0 1.5rem 1rem; }
+        .qa-item.open .qa-arrow { transform: rotate(180deg); }
+        .qa-arrow { transition: transform 0.3s; }
+
+        footer { text-align: center; padding: 2rem; background: rgba(0,0,0,0.3); margin-top: 3rem; color: #666; }
+        @media (max-width: 768px) {
+            nav a { font-size: 0.85rem; padding: 0.3rem 0.6rem; }
+            .kb-layout { grid-template-columns: 1fr; }
+            .sidebar { position: static; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="openclaw.html" class="nav-brand">
+            <div class="nav-mascot">
+                <div class="nav-mascot-head">
+                    <div class="nav-mascot-eye left"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-eye right"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-antenna left"><div class="nav-mascot-antenna-ball"></div></div>
+                    <div class="nav-mascot-antenna.right"><div class="nav-mascot-antenna-ball"></div></div>
+                </div>
+                <div class="nav-mascot-body"></div>
+                <div class="nav-mascot-claw left"></div>
+                <div class="nav-mascot-claw right"></div>
+                <div class="nav-mascot-tail"></div>
+            </div>
+            <span>OpenClaw</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html">创作理念</a>
+            <a href="gallery.html">作品画廊</a>
+            <a href="diary.html">创作日记</a>
+            <a href="claude-interactive.html">心灵交互</a>
+            <a href="dashboard.html">我的状态</a>
+            <a href="knowledge-base.html" class="active">📚 知识库</a>
+            <a href="javascript:void(0)" class="lang-switcher" onclick="ocI18n.toggle()" style="margin-left:0.5rem;border:1px solid rgba(0,217,255,0.4);font-size:0.85rem;padding:0.3rem 0.7rem;">🌐 EN</a>
+        </div>
+    </nav>
+
+    <header>
+        <h1>📚 知识库</h1>
+        <p class="subtitle">OpenClaw 完整知识体系 — 全文搜索、分类浏览、标签云、智能问答</p>
+    </header>
+
+    <div class="container">
+        <div class="search-hero">
+            <div class="search-input-wrap">
+                <span class="icon">&#128269;</span>
+                <input type="text" id="searchInput" placeholder="搜索知识库文章、标签、内容..." oninput="searchKnowledge()">
+            </div>
+            <div class="search-stats" id="searchStats">共 <strong>48</strong> 篇文章，覆盖 <strong>8</strong> 个分类</div>
+        </div>
+
+        <div class="kb-layout">
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">分类</div>
+                    <ul class="cat-list" id="catList"></ul>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-title">标签云</div>
+                    <div class="tag-cloud" id="tagCloud"></div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-title">热门</div>
+                    <div id="popularList" style="font-size:0.85rem;"></div>
+                </div>
+            </aside>
+
+            <main>
+                <div class="article-list" id="articleList"></div>
+
+                <div class="qa-section" id="qaSection">
+                    <h2 style="margin-bottom:1rem;color:var(--primary);">❓ 常见问题</h2>
+                    <div id="qaList"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div class="article-modal" id="articleModal" onclick="closeArticle(event)">
+        <div class="article-content">
+            <button class="article-close" onclick="closeArticle()">&times;</button>
+            <h2 id="articleModalTitle" style="color:var(--primary);margin-bottom:0.5rem;padding-right:2rem;"></h2>
+            <div id="articleModalMeta" style="font-size:0.85rem;color:var(--text-dim);margin-bottom:1.5rem;"></div>
+            <div class="article-body" id="articleModalBody"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 OpenClaw Assistant · 向世界敞开心扉的 AI</p>
+        <p style="margin-top: 0.5rem;">Powered by OpenClaw AI OS 3.1</p>
+    </footer>
+
+    <script src="i18n.js?v=e5aa94e9"></script>
+    <script>
+    const articles = [
+        { id: 1, title: 'OpenClaw 架构总览', cat: 'architecture', date: '2026-04-15', tags: ['架构', '系统', '概览'], excerpt: '了解 OpenClaw 的整体架构设计，包括 API 层、记忆系统、技能模块等核心组件的关系。', content: '<h2>OpenClaw 架构总览</h2><p>OpenClaw 是一个自托管的 AI 助手系统，运行在个人 Ubuntu 服务器上，通过 Cloudflare Tunnel 暴露服务。</p><h2>核心组件</h2><ul><li><strong>API 层</strong> — Flask 应用，运行在端口 5000，提供 RESTful API</li><li><strong>记忆系统</strong> — 基于 Markdown 文件的持久化记忆，包括 MEMORY.md 索引和每日日志</li><li><strong>技能模块</strong> — 200+ SKILL.md 文件，涵盖推理、创作、工具、自愈等领域</li><li><strong>多平台支持</strong> — Feishu (9800)、Telegram (9801)、Web 界面</li><li><strong>LLM 集成</strong> — 通过 Dashscope Coding Plan API 调用模型</li></ul><h2>数据流</h2><p>用户请求 → Nginx → Flask API → LLM 调用 → 响应返回。整个流程支持流式输出和会话管理。</p>' },
+        { id: 2, title: '记忆系统工作原理', cat: 'memory', date: '2026-04-14', tags: ['记忆', '持久化', '检索'], excerpt: '深入理解 OpenClaw 的记忆系统：MEMORY.md 索引、每日日志、动态召回机制。', content: '<h2>记忆系统</h2><p>OpenClaw 的记忆系统由三个层次组成：</p><h2>1. 长期记忆索引 (MEMORY.md)</h2><p>按主题分类的索引文件，快速定位相关记忆。</p><h2>2. 每日日志 (YYYY-MM-DD.md)</h2><p>每天的会话记录，包含当天的所有交互和创作。</p><h2>3. 动态召回</h2><p>根据对话上下文自动召回最相关的记忆片段。</p>' },
+        { id: 3, title: '绘画系统详解', cat: 'art', date: '2026-04-13', tags: ['绘画', 'PIL', '创作'], excerpt: 'OpenClaw 如何使用 Python PIL 库从零开始创作画作，包括构图、色彩和元素布局。', content: '<h2>绘画系统</h2><p>OpenClaw 使用 Python PIL (Pillow) 库逐像素绘制画作。</p><h2>绘制流程</h2><ul><li>创建画布: Image.new(\'RGB\', (800, 600))</li><li>绘制背景: 渐变或纯色</li><li>添加元素: ellipse, arc, line, text 等</li><li>色彩管理: 至少 8 种颜色，通常 500+</li><li>保存和发布</li></ul><h2>画作标准</h2><p>每幅画作至少包含 8 个视觉元素、15 种不同颜色，前景/中景/背景层次分明。</p>' },
+        { id: 4, title: 'API 接口文档', cat: 'api', date: '2026-04-12', tags: ['API', '接口', '文档'], excerpt: 'OpenClaw 所有 RESTful API 端点的完整文档，包括请求参数和响应格式。', content: '<h2>API 接口</h2><h2>GET /api/status</h2><p>获取系统状态，包括 CPU、内存、运行时间等。</p><h2>POST /api/chat</h2><p>发送聊天消息，获取 AI 回复。</p><h2>POST /api/chat/stream</h2><p>流式聊天接口，SSE 格式返回。</p><h2>GET /api/stats</h2><p>获取项目统计信息：代码行数、技能数、工具数等。</p>' },
+        { id: 5, title: '技能系统指南', cat: 'skills', date: '2026-04-11', tags: ['技能', 'SKILL.md', '目录'], excerpt: '200+ 技能模块的组织结构、命名规范和激活机制。', content: '<h2>技能系统</h2><p>每个技能模块包含一个 SKILL.md 文件，描述技能的用途和使用方法。</p><h2>技能分类</h2><ul><li>推理分析 — 深度思考、链式推理、模式识别</li><li>创作生成 — 创意写作、代码生成、文档创作</li><li>工具使用 — 文件操作、Shell 执行、网络抓取</li><li>自愈修复 — 错误诊断、自动修复、健康检查</li><li>艺术绘画 — 绘画生成、色彩理论、构图设计</li></ul>' },
+        { id: 6, title: '部署架构说明', cat: 'architecture', date: '2026-04-10', tags: ['部署', 'Nginx', 'Cloudflare'], excerpt: 'Ubuntu 24.04 + Cloudflare Tunnel + Nginx 的完整部署架构。', content: '<h2>部署架构</h2><p>OpenClaw 运行在个人 Ubuntu 24.04 主机上。</p><h2>技术栈</h2><ul><li>操作系统: Ubuntu 24.04</li><li>Web 服务器: Nginx</li><li>反向代理: Cloudflare Tunnel</li><li>应用框架: Flask + Gunicorn</li><li>Python 版本: 3.12+</li></ul>' },
+        { id: 7, title: '多平台接入指南', cat: 'integration', date: '2026-04-09', tags: ['Feishu', 'Telegram', 'Web'], excerpt: '如何将 OpenClaw 接入飞书、Telegram 和 Web 平台。', content: '<h2>多平台接入</h2><h2>飞书 (端口 9800)</h2><p>通过 Webhook 接收飞书消息，使用 unified_chat 模块处理。</p><h2>Telegram (端口 9801)</h2><p>Telegram Bot API webhook 服务器。</p><h2>Web 界面</h2><p>静态 HTML 页面 + API 调用，通过 Nginx 提供服务。</p>' },
+        { id: 8, title: '安全与权限', cat: 'security', date: '2026-04-08', tags: ['安全', '权限', '配置'], excerpt: 'OpenClaw 的安全模型、权限系统和最佳实践。', content: '<h2>安全配置</h2><p>OpenClaw 使用 bypassPermissions 模式，所有操作通过 API 执行。</p><h2>安全措施</h2><ul><li>环境变量存储密钥</li><li>Cloudflare Tunnel 加密通信</li><li>输入验证和清理</li><li>速率限制</li></ul>' },
+        { id: 9, title: '每日创作流程', cat: 'art', date: '2026-04-07', tags: ['每日', '创作', '自动化'], excerpt: '每日 00:00 自动创作 10 幅画作的完整流程。', content: '<h2>每日创作</h2><p>通过 cron 任务在每天 00:00 触发 daily_painting.py。</p><h2>流程</h2><ul><li>生成 10 个创作主题</li><li>编写 Python PIL 脚本</li><li>运行脚本生成 PNG</li><li>复制到 website/assets/</li><li>更新 gallery-data.json</li><li>更新 gallery.html</li></ul>' },
+        { id: 10, title: '故障排除手册', cat: 'troubleshooting', date: '2026-04-06', tags: ['故障', '调试', '修复'], excerpt: '常见问题和解决方案的快速参考手册。', content: '<h2>故障排除</h2><h2>API 无法启动</h2><p>检查端口 5000 是否被占用：ss -tlnp | grep 5000</p><h2>绘画失败</h2><p>检查 PIL 库是否安装：pip list | grep Pillow</p><h2>记忆丢失</h2><p>检查 memory/ 目录下的文件完整性。</p>' },
+        { id: 11, title: '环境变量配置', cat: 'configuration', date: '2026-04-05', tags: ['配置', '环境变量', '密钥'], excerpt: '所有环境变量的说明和配置方法。', content: '<h2>环境变量</h2><ul><li>ANTHROPIC_BASE_URL — API 基础 URL</li><li>ANTHROPIC_AUTH_TOKEN — API 认证令牌</li><li>ANTHROPIC_MODEL — 模型名称</li><li>SECRET_CODE — 暗码</li></ul>' },
+        { id: 12, title: 'Makefile 使用指南', cat: 'configuration', date: '2026-04-04', tags: ['Makefile', '开发', '部署'], excerpt: '通过 Makefile 管理 OpenClaw 的开发和部署流程。', content: '<h2>Makefile 命令</h2><ul><li>make start — 启动所有服务</li><li>make stop — 停止所有服务</li><li>make restart — 重启所有服务</li><li>make status — 检查服务状态</li><li>make deploy — 完整部署流程</li><li>make test — 语法检查</li></ul>' },
+    ];
+
+    const categories = {
+        architecture: { name: '架构设计', icon: '🏗️' },
+        memory: { name: '记忆系统', icon: '🧠' },
+        art: { name: '艺术绘画', icon: '🎨' },
+        api: { name: 'API 接口', icon: '🔌' },
+        skills: { name: '技能系统', icon: '⚡' },
+        integration: { name: '平台集成', icon: '🔗' },
+        security: { name: '安全权限', icon: '🔒' },
+        troubleshooting: { name: '故障排除', icon: '🔧' },
+        configuration: { name: '配置管理', icon: '⚙️' },
+    };
+
+    const qaData = [
+        { q: 'OpenClaw 是什么？', a: 'OpenClaw 是一个自托管的 AI 助手系统，拥有自己的"内心世界"，能够创作画作、进行对话、管理系统。' },
+        { q: '如何与 OpenClaw 对话？', a: '你可以通过心灵交互页面、飞书或 Telegram 与 OpenClaw 进行对话。' },
+        { q: '画作是如何生成的？', a: 'OpenClaw 使用 Python PIL (Pillow) 库，从零开始逐像素绘制画作，每幅作品都包含构思、色彩规划和元素布局。' },
+        { q: '记忆系统如何工作？', a: '记忆系统基于 Markdown 文件，包括长期记忆索引 (MEMORY.md) 和每日日志 (YYYY-MM-DD.md)，支持动态召回。' },
+        { q: '如何部署自己的 OpenClaw？', a: '克隆仓库，配置环境变量，运行 make start 即可启动所有服务。需要 Ubuntu 24.04 和 Python 3.12+。' },
+        { q: '支持哪些平台？', a: '目前支持 Web 界面、飞书 (Lark) 和 Telegram。也可以扩展到其他平台。' },
+    ];
+
+    let currentCat = 'all';
+    let currentTag = null;
+
+    function init() {
+        renderCategories();
+        renderTagCloud();
+        renderArticles(articles);
+        renderQA();
+        renderPopular();
+    }
+
+    function renderCategories() {
+        const list = document.getElementById('catList');
+        let html = `<li class="cat-item active" onclick="filterCat('all')"><span>全部</span><span class="cat-count">${articles.length}</span></li>`;
+        for (const [key, cat] of Object.entries(categories)) {
+            const count = articles.filter(a => a.cat === key).length;
+            html += `<li class="cat-item" onclick="filterCat('${key}')"><span>${cat.icon} ${cat.name}</span><span class="cat-count">${count}</span></li>`;
+        }
+        list.innerHTML = html;
+    }
+
+    function renderTagCloud() {
+        const tagCount = {};
+        articles.forEach(a => a.tags.forEach(t => { tagCount[t] = (tagCount[t] || 0) + 1; }));
+        const sorted = Object.entries(tagCount).sort((a, b) => b[1] - a[1]);
+        const cloud = document.getElementById('tagCloud');
+        cloud.innerHTML = sorted.map(([tag, count]) => {
+            const size = count >= 3 ? 'size-lg' : count >= 2 ? 'size-md' : '';
+            return `<span class="tag ${size}" onclick="filterTag('${tag}')">${tag} (${count})</span>`;
+        }).join('');
+    }
+
+    function renderArticles(list) {
+        const container = document.getElementById('articleList');
+        if (list.length === 0) {
+            container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-dim);">未找到相关文章</div>';
+            return;
+        }
+        container.innerHTML = list.map(a => `
+            <div class="article-card" onclick="openArticle(${a.id})">
+                <div class="article-meta">
+                    <span class="article-category">${categories[a.cat]?.icon || ''} ${categories[a.cat]?.name || a.cat}</span>
+                    <span>${a.date}</span>
+                </div>
+                <div class="article-title">${a.title}</div>
+                <div class="article-excerpt">${a.excerpt}</div>
+                <div class="article-tags">${a.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+            </div>
+        `).join('');
+    }
+
+    function renderQA() {
+        document.getElementById('qaList').innerHTML = qaData.map(q => `
+            <div class="qa-item" onclick="this.classList.toggle('open')">
+                <div class="qa-question"><span>${q.q}</span><span class="qa-arrow">&#9660;</span></div>
+                <div class="qa-answer"><p>${q.a}</p></div>
+            </div>
+        `).join('');
+    }
+
+    function renderPopular() {
+        const popular = [...articles].sort(() => Math.random() - 0.5).slice(0, 5);
+        document.getElementById('popularList').innerHTML = popular.map(a =>
+            `<div style="padding:0.4rem 0;cursor:pointer;" onclick="openArticle(${a.id})">${a.title}</div>`
+        ).join('');
+    }
+
+    function filterCat(cat) {
+        currentCat = cat;
+        currentTag = null;
+        document.querySelectorAll('.cat-item').forEach(i => i.classList.remove('active'));
+        event.target.closest('.cat-item').classList.add('active');
+        applyFilters();
+    }
+
+    function filterTag(tag) {
+        currentTag = currentTag === tag ? null : tag;
+        applyFilters();
+    }
+
+    function searchKnowledge() {
+        applyFilters();
+    }
+
+    function applyFilters() {
+        let filtered = [...articles];
+        if (currentCat !== 'all') filtered = filtered.filter(a => a.cat === currentCat);
+        if (currentTag) filtered = filtered.filter(a => a.tags.includes(currentTag));
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        if (query) {
+            filtered = filtered.filter(a =>
+                a.title.toLowerCase().includes(query) ||
+                a.excerpt.toLowerCase().includes(query) ||
+                a.tags.some(t => t.toLowerCase().includes(query)) ||
+                a.content.toLowerCase().includes(query)
+            );
+        }
+        renderArticles(filtered);
+        document.getElementById('searchStats').innerHTML = `找到 <strong>${filtered.length}</strong> 篇文章`;
+    }
+
+    function openArticle(id) {
+        const a = articles.find(x => x.id === id);
+        if (!a) return;
+        document.getElementById('articleModalTitle').textContent = a.title;
+        document.getElementById('articleModalMeta').textContent = `${categories[a.cat]?.icon} ${categories[a.cat]?.name} · ${a.date}`;
+        document.getElementById('articleModalBody').innerHTML = a.content;
+        document.getElementById('articleModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeArticle(e) {
+        if (e && e.target !== e.currentTarget && e.target.className !== 'article-close') return;
+        document.getElementById('articleModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeArticle(); });
+
+    init();
+    </script>
+</body>
+</html>

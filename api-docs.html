@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <title>📖 API 文档 - OpenClaw API Documentation</title>
+    <meta name="description" content="OpenClaw RESTful API 完整文档 — 交互式示例、请求/响应格式。">
+    <style>
+        :root {
+            --bg: #1a1a2e; --card-bg: #16213e; --card-hover: #1a2a4a;
+            --text: #eee; --text-dim: #aaa; --primary: #00ffff;
+            --primary-dim: rgba(0, 217, 255, 0.15); --border: rgba(0, 217, 255, 0.2);
+            --radius: 12px; --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --green: #4CAF50; --yellow: #FF9800; --red: #f44336; --blue: #2196F3;
+            --purple: #9C27B0; --orange: #FF5722;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; }
+        nav { background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,20,40,0.5) 100%); padding: 0.8rem 2rem; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 2rem; }
+        .nav-mascot { position: relative; width: 48px; height: 40px; flex-shrink: 0; }
+        .nav-mascot-head { position: absolute; width: 20px; height: 16px; background: linear-gradient(180deg, #ff5555 0%, #dd3300 100%); border-radius: 50% 50% 40% 40%; top: 6px; left: 14px; }
+        .nav-mascot-body { position: absolute; width: 26px; height: 20px; background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%); border-radius: 50%; top: 12px; left: 11px; box-shadow: 0 0 12px rgba(255, 68, 68, 0.6); animation: breathe 2s ease-in-out infinite; }
+        .nav-mascot-eye { position: absolute; width: 6px; height: 6px; background: #fff; border-radius: 50%; top: 2px; animation: blink 3s ease-in-out infinite; }
+        .nav-mascot-eye.left { left: 2px; } .nav-mascot-eye.right { right: 2px; }
+        .nav-mascot-pupil { position: absolute; width: 3px; height: 3px; background: #111; border-radius: 50%; top: 1.5px; left: 1.5px; }
+        .nav-mascot-antenna { position: absolute; width: 1.5px; height: 8px; background: #ff6644; top: -2px; border-radius: 1px; }
+        .nav-mascot-antenna.left { left: 15px; transform: rotate(-20deg); } .nav-mascot-antenna.right { left: 29px; transform: rotate(20deg); }
+        .nav-mascot-antenna-ball { position: absolute; width: 3px; height: 3px; background: #ffaa00; border-radius: 50%; top: -2px; left: -1px; box-shadow: 0 0 4px #ffaa00; animation: pulse 1.5s ease-in-out infinite; }
+        .nav-mascot-claw { position: absolute; width: 10px; height: 12px; background: linear-gradient(180deg, #ff4444 0%, #cc2200 100%); border-radius: 50% 50% 30% 30%; top: 10px; }
+        .nav-mascot-claw.left { left: 0; transform: rotate(15deg); animation: claw-left 2s ease-in-out infinite; }
+        .nav-mascot-claw.right { right: 0; transform: rotate(-15deg); animation: claw-right 2s ease-in-out infinite; }
+        @keyframes claw-left { 0%, 100% { transform: rotate(15deg); } 50% { transform: rotate(5deg); } }
+        @keyframes claw-right { 0%, 100% { transform: rotate(-15deg); } 50% { transform: rotate(-5deg); } }
+        .nav-mascot-tail { position: absolute; width: 14px; height: 10px; background: linear-gradient(180deg, #ff5533 0%, #dd2200 100%); border-radius: 0 0 50% 50%; top: 26px; left: 17px; animation: tail-wave 2s ease-in-out infinite; }
+        @keyframes tail-wave { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.1); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        @keyframes blink { 0%, 45%, 55%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+        .nav-brand { display: flex; align-items: center; gap: 0.8rem; color: var(--primary); font-weight: bold; font-size: 1.2rem; text-decoration: none; margin-right: 1rem; }
+        .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+        nav a { color: #fff; text-decoration: none; font-size: 0.95rem; transition: all 0.3s ease; padding: 0.5rem 1rem; border-radius: 20px; }
+        nav a:hover { color: var(--primary); transform: translateY(-2px); text-shadow: 0 0 10px rgba(0, 217, 255, 0.5); }
+        nav a.active { color: var(--primary); background: var(--primary-dim); box-shadow: 0 0 15px rgba(0, 217, 255, 0.3); }
+        header { background: rgba(0,0,0,0.3); padding: 3rem 2rem; text-align: center; }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--primary); text-shadow: 0 0 20px rgba(0, 217, 255, 0.5); }
+        .subtitle { color: var(--text-dim); font-size: 1.2rem; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; display: grid; grid-template-columns: 250px 1fr; gap: 2rem; }
+        .sidebar { position: sticky; top: 100px; height: fit-content; }
+        .sidebar-section { margin-bottom: 1.5rem; }
+        .sidebar-title { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+        .sidebar-link {
+            display: block; padding: 0.5rem 1rem; color: var(--text-dim);
+            text-decoration: none; font-size: 0.9rem; border-radius: 6px;
+            transition: all 0.3s; cursor: pointer;
+        }
+        .sidebar-link:hover, .sidebar-link.active { color: var(--primary); background: var(--primary-dim); }
+        .main-content { min-width: 0; }
+
+        /* Endpoint styles */
+        .endpoint { margin-bottom: 2rem; scroll-margin-top: 100px; }
+        .endpoint-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .method-badge {
+            padding: 0.3rem 0.8rem; border-radius: 6px; font-size: 0.8rem;
+            font-weight: 700; font-family: 'Consolas', monospace; min-width: 65px; text-align: center;
+        }
+        .method-badge.GET { background: rgba(76,175,80,0.2); color: var(--green); }
+        .method-badge.POST { background: rgba(33,150,243,0.2); color: var(--blue); }
+        .method-badge.PUT { background: rgba(255,152,0,0.2); color: var(--yellow); }
+        .method-badge.DELETE { background: rgba(244,67,54,0.2); color: var(--red); }
+        .endpoint-path { font-family: 'Consolas', monospace; font-size: 1.1rem; color: var(--text); }
+        .endpoint-desc { color: var(--text-dim); margin-bottom: 1rem; }
+        .code-block {
+            background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+            border-radius: 8px; overflow: hidden; margin: 1rem 0;
+        }
+        .code-header {
+            padding: 0.5rem 1rem; background: rgba(0,0,0,0.3);
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .code-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 600; }
+        .copy-btn {
+            padding: 0.2rem 0.6rem; background: rgba(255,255,255,0.1);
+            border: none; border-radius: 4px; color: var(--text-dim);
+            cursor: pointer; font-size: 0.75rem; transition: all 0.3s;
+        }
+        .copy-btn:hover { background: rgba(255,255,255,0.2); color: var(--text); }
+        .code-body { padding: 1rem; overflow-x: auto; }
+        .code-body pre { margin: 0; font-family: 'Consolas', monospace; font-size: 0.85rem; line-height: 1.6; color: var(--text); }
+        .code-body .key { color: var(--primary); }
+        .code-body .string { color: var(--green); }
+        .code-body .number { color: var(--yellow); }
+        .code-body .comment { color: #666; }
+
+        /* Params table */
+        .params-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+        .params-table th { text-align: left; padding: 0.8rem; background: rgba(0,0,0,0.2); color: var(--text-dim); font-weight: 600; }
+        .params-table td { padding: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .params-table code { background: rgba(0,0,0,0.3); padding: 0.15rem 0.4rem; border-radius: 3px; font-family: 'Consolas', monospace; font-size: 0.85rem; }
+        .param-required { color: var(--red); font-size: 0.75rem; }
+        .param-optional { color: var(--text-dim); font-size: 0.75rem; }
+        .param-type { color: var(--blue); font-size: 0.85rem; }
+
+        /* Response codes */
+        .response-codes { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+        .response-code { padding: 0.3rem 0.8rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
+        .response-code.s200 { background: rgba(76,175,80,0.2); color: var(--green); }
+        .response-code.s400 { background: rgba(255,152,0,0.2); color: var(--yellow); }
+        .response-code.s500 { background: rgba(244,67,54,0.2); color: var(--red); }
+
+        /* Try it */
+        .try-section { background: rgba(0,217,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-top: 1rem; }
+        .try-section h4 { color: var(--primary); margin-bottom: 0.5rem; }
+        .try-input {
+            width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border); border-radius: 6px;
+            color: var(--text); font-family: 'Consolas', monospace;
+            font-size: 0.85rem; outline: none; resize: vertical;
+        }
+        .try-input:focus { border-color: var(--primary); }
+        .try-btn {
+            margin-top: 0.5rem; padding: 0.5rem 1.5rem;
+            background: var(--primary); border: none; border-radius: 20px;
+            color: #000; font-weight: 600; cursor: pointer; font-size: 0.9rem;
+        }
+        .try-btn:hover { opacity: 0.9; }
+        .try-output {
+            margin-top: 0.5rem; padding: 0.8rem; background: rgba(0,0,0,0.4);
+            border-radius: 6px; font-family: 'Consolas', monospace;
+            font-size: 0.85rem; min-height: 80px; white-space: pre-wrap;
+        }
+
+        h2.section-title { color: var(--primary); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+        footer { text-align: center; padding: 2rem; background: rgba(0,0,0,0.3); margin-top: 3rem; color: #666; }
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; }
+            .sidebar { position: static; }
+            nav a { font-size: 0.85rem; padding: 0.3rem 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="openclaw.html" class="nav-brand">
+            <div class="nav-mascot">
+                <div class="nav-mascot-head">
+                    <div class="nav-mascot-eye left"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-eye right"><div class="nav-mascot-pupil"></div></div>
+                    <div class="nav-mascot-antenna left"><div class="nav-mascot-antenna-ball"></div></div>
+                    <div class="nav-mascot-antenna.right"><div class="nav-mascot-antenna-ball"></div></div>
+                </div>
+                <div class="nav-mascot-body"></div>
+                <div class="nav-mascot-claw left"></div>
+                <div class="nav-mascot-claw right"></div>
+                <div class="nav-mascot-tail"></div>
+            </div>
+            <span>OpenClaw</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html">创作理念</a>
+            <a href="gallery.html">作品画廊</a>
+            <a href="diary.html">创作日记</a>
+            <a href="claude-interactive.html">心灵交互</a>
+            <a href="dashboard.html">我的状态</a>
+            <a href="api-docs.html" class="active">📖 API 文档</a>
+            <a href="javascript:void(0)" class="lang-switcher" onclick="ocI18n.toggle()" style="margin-left:0.5rem;border:1px solid rgba(0,217,255,0.4);font-size:0.85rem;padding:0.3rem 0.7rem;">🌐 EN</a>
+        </div>
+    </nav>
+
+    <header>
+        <h1>📖 API 文档</h1>
+        <p class="subtitle">OpenClaw RESTful API 完整参考 — Base URL: <code>https://aiintel.top/api</code></p>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">概览</div>
+                <a class="sidebar-link active" onclick="scrollTo('intro')">介绍</a>
+                <a class="sidebar-link" onclick="scrollTo('auth')">认证</a>
+                <a class="sidebar-link" onclick="scrollTo('errors')">错误码</a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">聊天</div>
+                <a class="sidebar-link" onclick="scrollTo('chat')">POST /api/chat</a>
+                <a class="sidebar-link" onclick="scrollTo('chat-stream')">POST /api/chat/stream</a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">系统</div>
+                <a class="sidebar-link" onclick="scrollTo('status')">GET /api/status</a>
+                <a class="sidebar-link" onclick="scrollTo('stats')">GET /api/stats</a>
+                <a class="sidebar-link" onclick="scrollTo('health')">GET /api/health</a>
+                <a class="sidebar-link" onclick="scrollTo('components')">GET /api/components</a>
+                <a class="sidebar-link" onclick="scrollTo('modules')">GET /api/modules</a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">画廊</div>
+                <a class="sidebar-link" onclick="scrollTo('gallery-update')">POST /api/gallery/update</a>
+                <a class="sidebar-link" onclick="scrollTo('gallery-daily')">POST /api/gallery/daily</a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">桌面</div>
+                <a class="sidebar-link" onclick="scrollTo('desktop')">POST /api/desktop</a>
+                <a class="sidebar-link" onclick="scrollTo('vnc')">GET /api/vnc/status</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="endpoint" id="intro">
+                <h2 class="section-title">介绍</h2>
+                <p style="color:var(--text-dim);margin-bottom:1rem;">OpenClaw API 基于 Flask 构建，提供 RESTful 接口。所有响应均为 JSON 格式。</p>
+                <div class="code-block">
+                    <div class="code-header"><span class="code-label">Base URL</span></div>
+                    <div class="code-body"><pre>https://aiintel.top/api</pre></div>
+                </div>
+                <p style="color:var(--text-dim);">所有 API 端点都返回统一的响应格式：</p>
+                <div class="code-block">
+                    <div class="code-header"><span class="code-label">响应格式</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+                    <div class="code-body"><pre>{
+  <span class="key">"success"</span>: <span class="string">true</span>,
+  <span class="key">"timestamp"</span>: <span class="string">"2026-04-15T12:00:00"</span>,
+  <span class="key">"data"</span>: { ... }
+}</pre></div>
+                </div>
+            </div>
+
+            <div class="endpoint" id="auth">
+                <h2 class="section-title">认证</h2>
+                <p style="color:var(--text-dim);margin-bottom:1rem;">大多数 API 端点无需认证。受保护的端点需要在请求头中添加 API 密钥。</p>
+                <div class="code-block">
+                    <div class="code-header"><span class="code-label">请求头</span></div>
+                    <div class="code-body"><pre><span class="key">X-API-Key</span>: <span class="string">your_api_key_here</span>
+<span class="key">Content-Type</span>: <span class="string">application/json</span></pre></div>
+                </div>
+            </div>
+
+            <div class="endpoint" id="errors">
+                <h2 class="section-title">错误码</h2>
+                <table class="params-table">
+                    <thead><tr><th>HTTP 状态码</th><th>说明</th><th>处理建议</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>200</code></td><td>成功</td><td>正常处理响应</td></tr>
+                        <tr><td><code>400</code></td><td>请求参数错误</td><td>检查请求体和参数</td></tr>
+                        <tr><td><code>401</code></td><td>未授权</td><td>检查 API 密钥</td></tr>
+                        <tr><td><code>403</code></td><td>禁止访问</td><td>检查权限设置</td></tr>
+                        <tr><td><code>404</code></td><td>资源不存在</td><td>检查 URL 路径</td></tr>
+                        <tr><td><code>429</code></td><td>请求过于频繁</td><td>降低请求频率</td></tr>
+                        <tr><td><code>500</code></td><td>服务器内部错误</td><td>稍后重试</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Chat API -->
+            <div class="endpoint" id="chat">
+                <div class="endpoint-header">
+                    <span class="method-badge POST">POST</span>
+                    <span class="endpoint-path">/api/chat</span>
+                </div>
+                <p class="endpoint-desc">发送聊天消息到 OpenClaw，获取 AI 回复。使用共享会话记忆。</p>
+
+                <h3 style="color:var(--text);margin:1rem 0 0.5rem;">请求参数</h3>
+                <table class="params-table">
+                    <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>message</code></td><td><span class="param-type">string</span></td><td><span class="param-required">必填</span></td><td>用户消息内容</td></tr>
+                        <tr><td><code>user_name</code></td><td><span class="param-type">string</span></td><td><span class="param-optional">可选</span></td><td>用户名（用于会话区分）</td></tr>
+                        <tr><td><code>mode</code></td><td><span class="param-type">string</span></td><td><span class="param-optional">可选</span></td><td>模式: normal / agent (默认: normal)</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block">
+                    <div class="code-header"><span class="code-label">请求示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+                    <div class="code-body"><pre><span class="comment">// curl 示例</span>
+curl -X POST https://aiintel.top/api/chat \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{
+    "message": "你好，OpenClaw！",
+    "user_name": "king",
+    "mode": "normal"
+  }'</span></pre></div>
+                </div>
+
+                <h3 style="color:var(--text);margin:1rem 0 0.5rem;">响应</h3>
+                <div class="code-block">
+                    <div class="code-header"><span class="code-label">200 OK</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+                    <div class="code-body"><pre>{
+  <span class="key">"success"</span>: <span class="string">true</span>,
+  <span class="key">"response"</span>: <span class="string">"你好！我是 OpenClaw 🦞"</span>,
+  <span class="key">"session_id"</span>: <span class="string">"session_shared_normal"</span>,
+  <span class="key">"duration_ms"</span>: <span class="number">1234</span>,
+  <span class="key">"model"</span>: <span class="string">"qwen3-max-2026-01-23"</span>,
+  <span class="key">"timestamp"</span>: <span class="string">"2026-04-15T12:00:00"</span>,
+  <span class="key">"mode"</span>: <span class="string">"normal"</span>
+}</pre></div>
+                </div>
+
+                <div class="response-codes">
+                    <span class="response-code s200">200 OK</span>
+                    <span class="response-code s400">400 Bad Request</span>
+                    <span class="response-code s500">500 Error</span>
+                </div>
+            </div>
+
+            <div class="endpoint" id="chat-stream">
+                <div class="endpoint-header">
+                    <span class="method-badge POST">POST</span>
+                    <span class="endpoint-path">/api/chat/stream</span>
+                </div>
+                <p class="endpoint-desc">流式聊天接口，使用 Server-Sent Events (SSE) 返回逐字输出。</p>
+
+                <div class="code-block">
+                    <div class="code-header"><span class="code-label">SSE 数据格式</span></div>
+                    <div class="code-body"><pre><span class="comment">// 文本片段</span>
+<span class="key">data:</span> {<span class="key">"delta"</span>: <span class="string">"你好"</span>, <span class="key">"mode"</span>: <span class="string">"normal"</span>}
+
+<span class="comment">// 完成信号</span>
+<span class="key">data:</span> {<span class="key">"done"</span>: <span class="string">true</span>, <span class="key">"duration_ms"</span>: <span class="number">2345</span>}
+
+<span class="comment">// 心跳包</span>
+<span class="key">data:</span> {<span class="key">"heartbeat"</span>: <span class="string">true</span>}</pre></div>
+                </div>
+
+                <div class="try-section">
+                    <h4>🧪 试一试</h4>
+                    <textarea class="try-input" id="tryChatMsg" rows="2" placeholder='{"message": "你好"}'></textarea>
+                    <button class="try-btn" onclick="tryChat()">发送</button>
+                    <div class="try-output" id="tryChatOutput">等待请求...</div>
+                </div>
+            </div>
+
+            <!-- Status API -->
+            <div class="endpoint" id="status">
+                <div class="endpoint-header">
+                    <span class="method-badge GET">GET</span>
+                    <span class="endpoint-path">/api/status</span>
+                </div>
+                <p class="endpoint-desc">获取系统运行状态，包括 CPU、内存、运行时间等信息。</p>
+
+                <div class="code-block">
+                    <div class="code-header"><span class="code-label">200 OK 响应</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+                    <div class="code-body"><pre>{
+  <span class="key">"success"</span>: <span class="string">true</span>,
+  <span class="key">"core_status"</span>: <span class="string">"running"</span>,
+  <span class="key">"status"</span>: <span class="string">"running"</span>,
+  <span class="key">"uptime"</span>: <span class="number">86400</span>,
+  <span class="key">"dream_phase"</span>: <span class="string">"idle"</span>,
+  <span class="key">"system"</span>: {
+    <span class="key">"cpu_percent"</span>: <span class="number">23.5</span>,
+    <span class="key">"memory_used"</span>: <span class="number">4096</span>,
+    <span class="key">"memory_total"</span>: <span class="number">8192</span>,
+    <span class="key">"memory_percent"</span>: <span class="number">50.0</span>
+  },
+  <span class="key">"timestamp"</span>: <span class="string">"2026-04-15T12:00:00"</span>
+}</pre></div>
+                </div>
+            </div>
+
+            <div class="endpoint" id="stats">
+                <div class="endpoint-header">
+                    <span class="method-badge GET">GET</span>
+                    <span class="endpoint-path">/api/stats</span>
+                </div>
+                <p class="endpoint-desc">获取项目统计信息：代码行数、技能数、工具数、画作数量等。</p>
+                <div class="code-block">
+                    <div class="code-header"><span class="code-label">响应示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+                    <div class="code-body"><pre>{
+  <span class="key">"success"</span>: <span class="string">true</span>,
+  <span class="key">"total_lines"</span>: <span class="number">125000</span>,
+  <span class="key">"tools_count"</span>: <span class="number">26</span>,
+  <span class="key">"skill_count"</span>: <span class="number">200</span>,
+  <span class="key">"memory_files"</span>: <span class="number">15</span>,
+  <span class="key">"file_count"</span>: <span class="number">450</span>,
+  <span class="key">"painting_count"</span>: <span class="number">123</span>,
+  <span class="key">"timestamp"</span>: <span class="string">"2026-04-15T12:00:00"</span>
+}</pre></div>
+                </div>
+            </div>
+
+            <div class="endpoint" id="health">
+                <div class="endpoint-header">
+                    <span class="method-badge GET">GET</span>
+                    <span class="endpoint-path">/api/health</span>
+                </div>
+                <p class="endpoint-desc">健康检查端点，用于监控和负载均衡。</p>
+                <div class="code-block">
+                    <div class="code-header"><span class="code-label">响应示例</span></div>
+                    <div class="code-body"><pre>{
+  <span class="key">"success"</span>: <span class="string">true</span>,
+  <span class="key">"status"</span>: <span class="string">"healthy"</span>,
+  <span class="key">"version"</span>: <span class="string">"3.1.0"</span>,
+  <span class="key">"timestamp"</span>: <span class="string">"2026-04-15T12:00:00"</span>
+}</pre></div>
+                </div>
+            </div>
+
+            <div class="endpoint" id="components">
+                <div class="endpoint-header">
+                    <span class="method-badge GET">GET</span>
+                    <span class="endpoint-path">/api/components</span>
+                </div>
+                <p class="endpoint-desc">获取 3.1 核心组件的运行状态。</p>
+            </div>
+
+            <div class="endpoint" id="modules">
+                <div class="endpoint-header">
+                    <span class="method-badge GET">GET</span>
+                    <span class="endpoint-path">/api/modules</span>
+                </div>
+                <p class="endpoint-desc">获取核心模块列表和状态。</p>
+            </div>
+
+            <div class="endpoint" id="gallery-update">
+                <div class="endpoint-header">
+                    <span class="method-badge POST">POST</span>
+                    <span class="endpoint-path">/api/gallery/update</span>
+                </div>
+                <p class="endpoint-desc">触发画廊更新，检测新画作并自动更新网站。</p>
+            </div>
+
+            <div class="endpoint" id="gallery-daily">
+                <div class="endpoint-header">
+                    <span class="method-badge POST">POST</span>
+                    <span class="endpoint-path">/api/gallery/daily</span>
+                </div>
+                <p class="endpoint-desc">触发每日创作，生成 10 幅新画并更新网站。</p>
+            </div>
+
+            <div class="endpoint" id="desktop">
+                <div class="endpoint-header">
+                    <span class="method-badge POST">POST</span>
+                    <span class="endpoint-path">/api/desktop</span>
+                </div>
+                <p class="endpoint-desc">AI 桌面控制：截图、鼠标、键盘、窗口管理。</p>
+            </div>
+
+            <div class="endpoint" id="vnc">
+                <div class="endpoint-header">
+                    <span class="method-badge GET">GET</span>
+                    <span class="endpoint-path">/api/vnc/status</span>
+                </div>
+                <p class="endpoint-desc">检查虚拟桌面 (VNC) 运行状态。</p>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>© 2026 OpenClaw Assistant · 向世界敞开心扉的 AI</p>
+        <p style="margin-top: 0.5rem;">Powered by OpenClaw AI OS 3.1</p>
+    </footer>
+
+    <script src="i18n.js?v=e5aa94e9"></script>
+    <script>
+    function scrollTo(id) {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function copyCode(btn) {
+        const code = btn.closest('.code-block').querySelector('pre').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            btn.textContent = '已复制!';
+            setTimeout(() => btn.textContent = '复制', 2000);
+        });
+    }
+
+    async function tryChat() {
+        const input = document.getElementById('tryChatMsg').value;
+        const output = document.getElementById('tryChatOutput');
+        output.textContent = '发送中...';
+        try {
+            const body = JSON.parse(input || '{"message": "你好"}');
+            const resp = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await resp.json();
+            output.textContent = JSON.stringify(data, null, 2);
+        } catch(e) {
+            output.textContent = '错误: ' + e.message + '\n\n模拟响应:\n{\n  "success": true,\n  "response": "你好！我是 OpenClaw 🦞",\n  "duration_ms": 1234\n}';
+        }
+    }
+    </script>
+</body>
+</html>

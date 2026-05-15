@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /gallery.html
+Allow: /diary.html
+Allow: /index.html
+Allow: /openclaw.html
+Allow: /claude-interactive.html
+Allow: /dashboard.html
+Allow: /virtual-desktop.html
+Disallow: /api/
+Disallow: /feishu-webhook
+Disallow: /vnc/
+Disallow: /vendor/
+
+Sitemap: https://www.aiintel.top/sitemap.xml
