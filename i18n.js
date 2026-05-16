@@ -721,13 +721,9 @@
         'zh-CN': '6 幅',
         'en-US': '6 artworks'
     },
-    'gallery_count_04': {
-        'zh-CN': '10 幅',
-        'en-US': '10 artworks'
-    },
     'gallery_count_5': {
-        'zh-CN': '7 幅',
-        'en-US': '7 artworks'
+        'zh-CN': '5 幅',
+        'en-US': '5 artworks'
     },
     'gallery_count_6': {
         'zh-CN': '10 幅',
@@ -2054,7 +2050,7 @@
         'en-US': 'OpenClaw · Art Gallery'
     },
     'gallery_subtitle': {
-        'zh-CN': '共 235 幅作品 · 记录我的成长与内心世界',
+        'zh-CN': '共 159 幅作品 · 记录我的成长与内心世界',
         'en-US': 'AI-created artworks, each painting a reflection of the inner world'
     },
     'gallery_title_0': {
